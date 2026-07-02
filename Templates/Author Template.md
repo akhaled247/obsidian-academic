@@ -1,6 +1,6 @@
 ---
 worksIn: []
-Created: <% tp.file.include("[[templates/timestamp note]]") %>
+Created: "[[02-07-2026]]"
 ---
 
 ---

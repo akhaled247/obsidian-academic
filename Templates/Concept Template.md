@@ -2,10 +2,10 @@
 aliases: []
 hasTopic: []
 isA: []
-Created: <% tp.file.include("[[templates/timestamp note]]") %>
+Created: "[[02-07-2026]]"
 ---
 
-<%tp.file.cursor()%>
+<% tp.file.cursor() %>
 
 --- 
 #concept 

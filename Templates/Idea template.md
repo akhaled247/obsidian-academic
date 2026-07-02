@@ -3,10 +3,10 @@ with:
 hasTopic: 
 score: 
 Created:
-  - <% tp.file.include("[[templates/timestamp note]]") %>
+  - "[[02-07-2026]]"
 ---
 
-<%tp.file.cursor()%>
+<% tp.file.cursor() %>
 
 --- 
 #project/idea

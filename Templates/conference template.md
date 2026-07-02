@@ -2,7 +2,7 @@
 aliases: 
 partOf:
 Created:
-  - <% tp.file.include("[[templates/timestamp note]]") %>
+  - "[[02-07-2026]]"
 ---
 
 
