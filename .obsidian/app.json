@@ -1,0 +1,13 @@
+{
+  "spellcheck": false,
+  "autoPairBrackets": false,
+  "autoPairMarkdown": false,
+  "autoConvertHtml": false,
+  "showUnsupportedFiles": true,
+  "attachmentFolderPath": "Files",
+  "userIgnoreFilters": [
+    "Templates/"
+  ],
+  "alwaysUpdateLinks": true,
+  "promptDelete": false
+}
