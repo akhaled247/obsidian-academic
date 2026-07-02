@@ -3,10 +3,12 @@ aliases:
   - Foundational Paper
   - SpecRLBench
   - Main Paper
-author: Zijian Guo
+author: "[[Zijian Guo]]"
 hasTopic:
   - "[[SpecRLBench]]"
-project: "[[BU RISE SpecRLBench]]"
+  - "[[Simulation]]"
+  - "[[UGV]]"
+project: "[[_BU RISE SpecRLBench]]"
 publishedIn: "[[arXiv]]"
 year: "[[2026]]"
 Created:

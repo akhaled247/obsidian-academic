@@ -13,12 +13,15 @@ views:
     order:
       - file.name
       - author
-      - hasTopic
+      - URL
     sort:
+      - property: file.name
+        direction: DESC
       - property: author
         direction: ASC
     summaries:
       hasTopic: Filled
+      URL: Unique
     columnSize:
       file.name: 231
       note.author: 268

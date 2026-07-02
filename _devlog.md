@@ -28,6 +28,16 @@ score:
 [SpecRLBench](https://github.com/BU-DEPEND-Lab/SpecRLBench) \
 [RISE Python Training](https://github.com/akhaled247/rise_python_training/tree/main) \
 [Gymnasium Documentation](https://gymnasium.farama.org/tutorials)
+### Papers
+| URL                                                              |
+| ---------------------------------------------------------------- |
+| https://www.intechopen.com/chapters/56080                        |
+| https://arxiv.org/pdf/2506.06136                                 |
+| https://arxiv.org/pdf/2308.00331                                 |
+| https://arxiv.org/pdf/2604.24729v1                               |
+| https://arxiv.org/pdf/2102.06069                                 |
+| https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9220149 |
+| https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10876050    |
 # 06.29.2026
 
 ### Old command
@@ -192,12 +202,54 @@ I started the day out by trying to understand how environments are created. A ru
 `builder.py` - this is the builder of the environments, which is where the world is constructed (inluding obstacles) \
 `__init.py__` - this is where all of the environments are created when you run `pip install -e .` \
 `world.py` - this is the world that includes the observation space
-
 `\base` - this is where all of the "template" files are included
 - `underlying` - the source of all of the base files
 - `base_task` - the template for creating tasks
-`ltl` - the directory where all of the LTL-specific (TODO: WORDS NEEDED) are created
+`\ltl` - the directory where all of the LTL-specific (TODO: WORDS NEEDED) are created
 - `ltl_base_task` - built off of `base-task`, it allows the user to encode LTL tasks. Used by other ltl tasks in `\ltl`
 - *Note: These tasks must be imported into the `__init.py__` file in the `\tasks` directory*
+After exploring the repository more, I was able to create my own custom task `multi-goal-level3` and my own gym wrapper `safety_gym_wrapper_ma_sro` and integrate them into the existing codebase.
+After that, I moved on to diving deeper into how simulation environments for search and rescue (SAR) environments are currently constructed. Below are all of the papers that I have analyzed so far to learn about how to make a new environment that would satisfy the goals outlined in the presentation provided. 
+## Papers
+### [Unmanned Ground Robots for Rescue Tasks](https://www.intechopen.com/chapters/56080)
+Simulation uses a grid map, but also uses point-cloud mapping to construct a 3D visualization of the environment.
+### [UAV-UGV Cooperative Trajectory Optimization and Task Allocation for Medical Rescue Tasks in Post-Disaster Environments](https://arxiv.org/pdf/2506.06136)
+Trying to create tasks for multiple agents, with each task being completed individually.
+Using [[Genetic Algorithm]]s, which are better for complex environments. Selects the highest-fitness individuals and mutates them.
+Each agent is assigned one task unique to them
+Minimum safety distance away from vehicle
+Obstacles represented as circles (zones!!!), all vehicles spawn in the same place
+https://github.com/Cherry0302/disaster_uav_ugv_rescue_planner
+### [Target Search and Navigation in Heterogeneous Robot Systems with Deep Reinforcement Learning](https://arxiv.org/pdf/2308.00331)
+![[Top view of the designed simulation environment for search and rescue in underground mine scenario.png|603]]
+>[!quote]
+>The black lines denote the wall and the sphere-represented victim randomly appears in one of the two branches during the environment generation
+### [SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning](https://arxiv.org/pdf/2604.24729v1)
+Benchmark for testing different spectulation-guided RL models (hence [[SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning|SpecRLBench]] name). Currently, there are 19 environments to choose from, split between **navigation** and **manipulation** tasks. I don't understand how the environments are dynamically created, so I will have to look into that.
+### [Search Planning of a UAV-UGV Team with Localization Uncertainty in a Subterranean Environment](https://arxiv.org/pdf/2102.06069)
+![[Gazebo simulation environment that reflects a highway tunnel with some obstacles.png|384]]
+Simulation environment was more realistic (using Gazebo simulator)
+- Included irregular models, but was essentially a cylinder cut in half and hollowed out
+- Sensors included LIDAR and two cameras -- one facing upwards, and one facing forwards. This was done to map out the entire environment since it was a 3D space (by contrast, the [[SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning|SpecRLBench]] workspace is effectively 2.5D)
+### [Collaborative Multi-Robot Search and Rescue.. Planning, Coordination, Perception, and Active Vision](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9220149)
+Simulation for SAR environments should be more robust than traditional applications since the environment is often more complex than traditional environments.
+**Sim2Real** methods
+Important to consider noisy data, unbalanced data, and conflicting data as potential issues when abstracting away certain parameters
+- May be useful to consider creating some of these disruptions within the simulator to increase its realism
+
+(10/27) Multi-Robot Task Allocation
+- Most often these are centralized, but decentralized approaches are more robust for the types of environments they operate in (especially SAR environments)
+- Market-based approaches and auctions
+- Liu et al. -- Potentially use a supervised system to adapt the robot when new situations occur
+### [A Heterogeneous Unmanned Ground Vehicle and Blimp Robot Team for Search and Rescue using Data-driven Autonomy and Communication-aware Navigation](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10876050)
+Teams were given points based on how many "artifacts" they found and reported to the correct location (not individuals)
+UAVs and UGVs worked together to a) map out the environment and b) find the aforementioned artifacts (e.g. person, backpack, items, etc.)
+Real-world environments (not super helpful for understanding how simulations should be made)
+UAVs (blimps) were used in mazes and trajectories were mapped out
+
+Once I finished reading those papers, I constructed a mock-up of the environment and task that I hope to complete:
+![[MockUp of Custom SAR Environment Layout.png]]
+The obstacles, victims, buildings, and humans will all be randomized (easier than static placements), and the agents will always spawn near the center. This way, there is a good balance between randomness (which is required to prevent an overfitted policy) and structure (since otherwise, the simulation would not be realistic).  
+
 --- 
 #project/idea
