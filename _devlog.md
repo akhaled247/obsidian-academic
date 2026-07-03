@@ -41,6 +41,9 @@ score:
 [SpecRLBench](https://github.com/BU-DEPEND-Lab/SpecRLBench) \
 [RISE Python Training](https://github.com/akhaled247/rise_python_training/tree/main) \
 [Gymnasium Documentation](https://gymnasium.farama.org/tutorials)
+[MuJoCo Creating Models](https://mujoco.readthedocs.io/en/latest/XMLreference.html)
+[akhaled247/SpecRLBench](https://github.com/akhaled247/SpecRLBench)
+[BURISE-26 Project Repository](https://github.com/akhaled247/BURISE-26)
 # Papers
 | URL                                                              |
 | ---------------------------------------------------------------- |
@@ -250,6 +253,11 @@ UAVs (blimps) were used in mazes and trajectories were mapped out
 Once I finished reading those papers, I constructed a mock-up of the environment and task that I hope to complete:
 ![MockUp of Robust MAS SAR Environment](Images/mockup.png)
 The obstacles, victims, buildings, and humans will all be randomized (easier than static placements), and the agents will always spawn near the center. This way, there is a good balance between randomness (which is required to prevent an overfitted policy) and structure (since otherwise, the simulation would not be realistic).
+### GitHub Repositories
+#### [akhaled247/SpecRLBench](https://github.com/akhaled247/SpecRLBench)
+This is a fork of the SpecRLBench repository, where i am developing the environment as explains above.
+#### [akhaled247/BURISE-26](https://github.com/akhaled247/BURISE-26)
+This is the repository where I'm housing the work that I have done. Currently, it just has the SpecRLBench submodule, but I may add other directories if needed.  [TODO: Ask for recommendation/permission to move repo to BU-DEPEND-LAB] 
 
 --- 
 #project/idea
