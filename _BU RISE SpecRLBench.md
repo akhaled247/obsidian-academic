@@ -8,7 +8,7 @@ Created: <% tp.file.include("[[templates/timestamp note]]") %>
 ---
 > [!devlog]-
 > ```EmbedRelativeTo
-> github://akhaled247.github.io/_pages/rise/devlog.md
+> https://github.com/akhaled247/obsidian-academic/README.md
 > ```
 
 More on the way
