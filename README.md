@@ -17,8 +17,7 @@ with:
 score:
 ---
 #rise-dcl-log 
-**Table of Contents**
-
+# Table of Contents
 - [Sources](#sources)
 - [Papers](#papers)
 - [06.29.2026](#06292026)
