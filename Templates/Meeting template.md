@@ -4,4 +4,4 @@
 --- 
 #meeting
 with:: 
-<% tp.file.include("[[templates/timestamp note]]") %>
+<% tp.file.include("[timestamp note](timestamp%20note.md)") %>

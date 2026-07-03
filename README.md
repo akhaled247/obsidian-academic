@@ -221,16 +221,16 @@ Minimum safety distance away from vehicle
 Obstacles represented as circles (zones!!!), all vehicles spawn in the same place
 https://github.com/Cherry0302/disaster_uav_ugv_rescue_planner
 ##### [Target Search and Navigation in Heterogeneous Robot Systems with Deep Reinforcement Learning](https://arxiv.org/pdf/2308.00331)
-![[Top view of the designed simulation environment for search and rescue in underground mine scenario.png|697]]
+![Top view of the designed simulation environment for search and rescue in underground mine scenario](Images/topview.png)
 >[!quote]
 >The black lines denote the wall and the sphere-represented victim randomly appears in one of the two branches during the environment generation
 ##### [SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning](https://arxiv.org/pdf/2604.24729v1)
-Benchmark for testing different spectulation-guided RL models (hence [[SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning|SpecRLBench]] name). Currently, there are 19 environments to choose from, split between **navigation** and **manipulation** tasks. I don't understand how the environments are dynamically created, so I will have to look into that.
+Benchmark for testing different spectulation-guided RL models (hence [SpecRLBench](SpecRLBench..%20A%20Benchmark%20for%20Generalization%20in%20Specification-Guided%20Reinforcement%20Learning.md) name). Currently, there are 19 environments to choose from, split between **navigation** and **manipulation** tasks. I don't understand how the environments are dynamically created, so I will have to look into that.
 ##### [Search Planning of a UAV-UGV Team with Localization Uncertainty in a Subterranean Environment](https://arxiv.org/pdf/2102.06069)
-![[Gazebo simulation environment that reflects a highway tunnel with some obstacles.png|384]]
+![Gazebo simulation environment that reflects a highway tunnel with some obstacles](Images/gazebosim.png)]
 Simulation environment was more realistic (using Gazebo simulator)
 - Included irregular models, but was essentially a cylinder cut in half and hollowed out
-- Sensors included LIDAR and two cameras -- one facing upwards, and one facing forwards. This was done to map out the entire environment since it was a 3D space (by contrast, the [[SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning|SpecRLBench]] workspace is effectively 2.5D)
+- Sensors included LIDAR and two cameras -- one facing upwards, and one facing forwards. This was done to map out the entire environment since it was a 3D space (by contrast, the [SpecRLBench](SpecRLBench..%20A%20Benchmark%20for%20Generalization%20in%20Specification-Guided%20Reinforcement%20Learning.md) workspace is effectively 2.5D)
 ##### [Collaborative Multi-Robot Search and Rescue.. Planning, Coordination, Perception, and Active Vision](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9220149)
 Simulation for SAR environments should be more robust than traditional applications since the environment is often more complex than traditional environments.
 **Sim2Real** methods
@@ -248,7 +248,7 @@ Real-world environments (not super helpful for understanding how simulations sho
 UAVs (blimps) were used in mazes and trajectories were mapped out
 
 Once I finished reading those papers, I constructed a mock-up of the environment and task that I hope to complete:
-![[MockUp of Custom SAR Environment Layout.png]]
+![MockUp of Robust MAS SAR Environment](Images/mockup.png)
 The obstacles, victims, buildings, and humans will all be randomized (easier than static placements), and the agents will always spawn near the center. This way, there is a good balance between randomness (which is required to prevent an overfitted policy) and structure (since otherwise, the simulation would not be realistic).
 
 --- 

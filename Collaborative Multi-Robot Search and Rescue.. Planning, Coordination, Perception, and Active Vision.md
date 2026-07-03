@@ -4,7 +4,7 @@ author: "[[Jorge Peña ]]"
 hasTopic:
   - "[[Environment]]"
   - "[[Simulation]]"
-project: "[[_BU RISE SpecRLBench]]"
+project: "[\\_BU RISE SpecRLBench](_BU%20RISE%20SpecRLBench.md)"
 publishedIn: "[[IEEE]]"
 year: "[[2020]]"
 Created:

@@ -6,7 +6,7 @@ hasTopic:
   - "[[Genetic Algorithm]]"
   - "[[Simulation]]"
   - "[[UGV]]"
-project: "[[_BU RISE SpecRLBench]]"
+project: "[\\_BU RISE SpecRLBench](_BU%20RISE%20SpecRLBench.md)"
 publishedIn: "[[arXiv]]"
 year: "[[2025]]"
 Created:

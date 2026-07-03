@@ -6,7 +6,7 @@ hasTopic:
   - "[[Real-World]]"
   - "[[UGV]]"
   - "[[UAV]]"
-project: "[[_BU RISE SpecRLBench]]"
+project: "[\\_BU RISE SpecRLBench](_BU%20RISE%20SpecRLBench.md)"
 publishedIn: "[[IEEE]]"
 year: "[[2022]]"
 Created:

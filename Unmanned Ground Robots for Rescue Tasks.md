@@ -5,7 +5,7 @@ hasTopic:
   - "[[Environment]]"
   - "[[Simulation]]"
   - "[[UGV]]"
-project: "[[_BU RISE SpecRLBench]]"
+project: "[\\_BU RISE SpecRLBench](_BU%20RISE%20SpecRLBench.md)"
 publishedIn: "[[IntechOpen]]"
 year: "[[2017]]"
 Created:

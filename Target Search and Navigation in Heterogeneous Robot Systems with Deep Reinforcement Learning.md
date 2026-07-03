@@ -5,14 +5,14 @@ hasTopic:
   - "[[Environment]]"
   - "[[UGV]]"
   - "[[Simulation]]"
-project: "[[_BU RISE SpecRLBench]]"
+project: "[\\_BU RISE SpecRLBench](_BU%20RISE%20SpecRLBench.md)"
 publishedIn: "[[arXiv]]"
 year: "[[2023]]"
 Created:
   - "[[02-07-2026]]"
 URL: https://arxiv.org/pdf/2308.00331
 ---
-![[Top view of the designed simulation environment for search and rescue in underground mine scenario.png|603]]
+![[Images/topview.png|603]]
 >[!quote]
 >The black lines denote the wall and the sphere-represented victim randomly appears in one of the two branches during the environment generation
 
