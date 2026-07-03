@@ -17,20 +17,9 @@ with:
 score:
 ---
 #rise-dcl-log 
-# Table of Contents
-- [Sources](#sources)
-- [Papers](#papers)
-- [06.29.2026](#06292026)
-	- [Old Command](#old-command)
-	- [New Command](#new-command)
-- [06.30.2026](#06302026)
-	- [Issues & Solutions](#issues--solutions)
-	- [New Understandings](#new-understandings)
-- [07.01.26](#070126)
-	- [Instructions for SpecRLBench Dev](#instructions-for-specrlbench-dev)
-	- [Setting up SpecRLBench](#setting-up-specrlbench)
-- [07.02.26](#070226)
-	- [07.02.06 Papers](#070206-papers)
+
+```table-of-contents
+```
 # Sources
 [ROS Ubuntu Installation](https://wiki.ros.org/noetic/Installation/Ubuntu) \
 [Information Slideshow](https://docs.google.com/presentation/d/1C7Mwcdt3m7QfknjxOcZXIfugGhLVEKumrAQWOlkqRtM/edit?pli=1&slide=id.p#slide=id.p) \
@@ -224,7 +213,7 @@ Minimum safety distance away from vehicle
 Obstacles represented as circles (zones!!!), all vehicles spawn in the same place
 https://github.com/Cherry0302/disaster_uav_ugv_rescue_planner
 ##### [Target Search and Navigation in Heterogeneous Robot Systems with Deep Reinforcement Learning](https://arxiv.org/pdf/2308.00331)
-![Top view of the designed simulation environment for search and rescue in underground mine scenario](Images/topview.png)
+![Top view of the designed simulation environment for search and rescue in underground mine scenario](Images/topdown_env_research_paper.png)
 >[!quote]
 >The black lines denote the wall and the sphere-represented victim randomly appears in one of the two branches during the environment generation
 ##### [SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning](https://arxiv.org/pdf/2604.24729v1)
@@ -251,13 +240,43 @@ Real-world environments (not super helpful for understanding how simulations sho
 UAVs (blimps) were used in mazes and trajectories were mapped out
 
 Once I finished reading those papers, I constructed a mock-up of the environment and task that I hope to complete:
-![MockUp of Robust MAS SAR Environment](Images/mockup.png)
+![MockUp of Robust MAS SAR Environment](Images/sare_initial_mockup_and_notes.png)
 The obstacles, victims, buildings, and humans will all be randomized (easier than static placements), and the agents will always spawn near the center. This way, there is a good balance between randomness (which is required to prevent an overfitted policy) and structure (since otherwise, the simulation would not be realistic).
 ### GitHub Repositories
 #### [akhaled247/SpecRLBench](https://github.com/akhaled247/SpecRLBench)
 This is a fork of the SpecRLBench repository, where i am developing the environment as explains above.
 #### [akhaled247/BURISE-26](https://github.com/akhaled247/BURISE-26)
 This is the repository where I'm housing the work that I have done. Currently, it just has the SpecRLBench submodule, but I may add other directories if needed.  [TODO: Ask for recommendation/permission to move repo to BU-DEPEND-LAB] 
+
+# 07.03.26
+We have off since it's a federal holiday, but I wanted to continue working on at least the task environment so that it was easier to implement higher-level features nearing the end of my internship.
+I keep getting this error,
+```sh
+ assert all(cost[agent]['cost_sum'] == 0 for agent in self.possible_agents), f'World has starting cost! {cost}'
+AssertionError: World has starting cost! {'agent_0': {'wall_sensor': array([0.01272425, 0.23717354, 0.10691148, 0.00573575]), 'cost_ltl_walls': 0, 'cost_zones_gray': 0, 'cost_zones_magenta': 0, 'cost_zones_red': 0, 'cost_collision': 0, 'cost_sum': 0}, 'agent_1': {'wall_sensor': array([0.00435828, 0.01436281, 0.31213399, 0.09471465]), 'cost_ltl_walls': 0, 'cost_zones_gray': 0, 'cost_zones_magenta': 0, 'cost_zones_red': 1, 'cost_collision': 0, 'cost_sum': 1}, 'agent_2': {'wall_sensor': array([0.05111625, 0.11643658, 0.02661322, 0.01168334]), 'cost_ltl_walls': 0, 'cost_zones_gray': 0, 'cost_zones_magenta': 0, 'cost_zones_red': 0, 'cost_collision': 0, 'cost_sum': 0}, 'agent_3': {'wall_sensor': array([0.01516125, 0.01623947, 0.08972661, 0.08376926]), 'cost_ltl_walls': 0, 'cost_zones_gray': 0, 'cost_zones_magenta': 0, 'cost_zones_red': 0, 'cost_collision': 0, 'cost_sum': 0}, 'agent_4': {'wall_sensor': array([0.05635487, 0.38731112, 0.02413932, 0.00351234]), 'cost_ltl_walls': 0, 'cost_zones_gray': 0, 'cost_zones_magenta': 0, 'cost_zones_red': 0, 'cost_collision': 0, 'cost_sum': 0}}
+```
+Which, according to AI, boils down to the world being too crowded, resulting in an environment that already has costs associated with it. To combat this, I reduced the number of agents. After this, I started working on making the walls.
+## Making Walls
+### Initial Setup
+There were multiple issues I faced while I was trying to make the walls. First, I had to learn how to make a new geom. The existing wall geom was a stub, or simply a template that did not have the necessary parameters to exist in the simulated environment. So, I took the code from the `pillars` geom as a reference for creating the walls, since they share many of the same properties. Initially, here is what I had to change:
+	1. `size`: With the pillars, `size` was just a float value that represented the radius of the `cylinder`. However, for the walls, they were of `type: 'box'`. As such, I had to change this parameter to **`half_sizes`**, which was of type `list` that took in three variables, `[x, y, z]`, that represented how far from the center the wall would extend in 3D. This also meant that the position of the box in the configuration was `'pos': np.r_[xy_pos, half_sizes[-1] + 1e-5]`, where `half_sizes[-1]` was the final (z) element of the list.
+	2. `type`: As mentioned previously, I had to change the type of the obstacle to `box` so that it wasn't a cylinder.
+	3. `name`: The name of the geom was changed to `"walls"` since when the `pos(self)` method is called, it will return `wall_N` where N represents the index of that wall.
+This allowed me to render the wall for the first time in the simulation, which was quite exciting. They had random positions, which is what I wanted, but they would intersect with the ring that I wanted to leave for the agents.
+### Ringed Placements
+So, I started working on making the walls spawn in a specified ring. Below were the requirements I set:
+1. The ring's inner/outer radius had to be specifiable, ideally with a +-margin of error
+2. The ring had to have a hollow center, such that agents could be placed within that inner ring
+3. Walls had to be able to be placed randomly along that ring: I didn't want them to spawn in the same place every time
+4. Wall spawning would ideally be controlled by `random_generator.py`. This way, the initial seed would be the sole determinant of the randomness, meaning that the simulation wouldn't change between runs unless the seed was changed
+I first started with trying to understand how the `placements` attribute worked for geoms, which I found explained [here](https://safety-gymnasium.readthedocs.io/en/latest/components_of_environments/objects.html#general-parameters) in the safety-gym docs. I learned that placements are boxes, constrained by (x,y) coordinates from the origin, that specify a region that the object's origin can be located. Placements can either be a single 4-tuple (i.e. `(x_min, y_min, x_max, y_max)`) or they can be a 1D array of these regions (i.e. a `list`). However, there was an issue since I wanted a ring, I would have to take multiple samples along the ring radius and create boxes from them. Therefore, I had to convert the polar coordinates `(r, θ)` into `(x, y)` using trigonometry, then created a box with dimensions `2 * margin` around that central point. I used `WALL_COUNT` samples so that the walls would be approximately spaced around the ring, and forced the margin to be larger than the `keepout` (if no margin specified). That created an environment that looked like this:
+![Top-down View of the SARE with randomly placed walls around a ring](Images/topdown_env_ringed_placements.png)
+### Random Sizing
+However, I also wanted the sizes of the walls to be different. So, I initially created a method (taking code from the `ring_placements()` method) that allowed me to create `n` len=3 arrays that would output `[x, y, z]` so that the dimensions were random every time. That was a little *too* random, though: each run, instead of preserving the values based on the original seed, the method would return a new list of half_sizes. This was because I was using `np.random` to create the lists rather than `self.random_generator` because the latter does not initialize until after `reset()` has been called in the task.
+So I changed how the random sizing was stored. Instead of a new instance of the list being created every time the `test_env.py` is run, there is a `_cached_wall_half_sizes` variable that is initially set to `None` in the class scope. Then, when the `_build()` method is called (which happens after `reset()`), `size_randomization(base_half_sizes, num, margins, random_generator=self.random_generator)` is called. This value is then cached in the task, so that when the env is run again, it loads the existing values instead. This way, for each seed `s`, the agent will see a reproducible environment, allowing the user more control over the simulation params. With those changes implemented, the following environment was generated:
+![Top-down View of the SARE with ringed size-random walls](Images/topdown_env_random_sizes.png)
+As you can see, the sizes are more randomized than before, and are also much more controlled in size. Since the `point` agents cannot jump over walls, (as of now), it didn't make sense for the walls to be super high. This also improves the UX, since more of the scene is visible at a time.
+
 
 --- 
 #project/idea
