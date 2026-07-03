@@ -16,10 +16,42 @@ year: "[[2026]]"
 with:
 score:
 ---
+<!-- Table of Contents arrowType: > | title: Table of Contents  | codeBlocks: y -->
+# Table of Contents
+> [[_devlog#Sources|Sources]]
+> [[_devlog#Papers|Papers]]
+> [[_devlog#06.29.2026|06.29.2026]]
+	> [[_devlog##Old Command|Old Command]]
+	> [[_devlog##New Command|New Command]]
+> [[_devlog#06.30.2026|06.30.2026]]
+	> [[_devlog##Issues & Solutions|Issues & Solutions]]
+	> [[_devlog##New Understandings|New Understandings]]
+> [[_devlog#07.01.26|07.01.26]]
+	> [[_devlog##Instructions for SpecRLBench Dev|Instructions for SpecRLBench Dev]]
+	> [[_devlog##Setting up SpecRLBench|Setting up SpecRLBench]]
+> [[_devlog#07.02.26|07.02.26]]
+	> [[_devlog##07.02.06 Papers|07.02.06 Papers]]
+			> [[_devlog####[Unmanned Ground Robots for Rescue Tasks](https://www.intechopen.com/chapters/56080)|[Unmanned Ground Robots for Rescue Tasks](https://www.intechopen.com/chapters/56080)]]
+			> [[_devlog####[UAV-UGV Cooperative Trajectory Optimization and Task Allocation for Medical Rescue Tasks in Post-Disaster Environments](https://arxiv.org/pdf/2506.06136)|[UAV-UGV Cooperative Trajectory Optimization and Task Allocation for Medical Rescue Tasks in Post-Disaster Environments](https://arxiv.org/pdf/2506.06136)]]
+			> [[_devlog####[Target Search and Navigation in Heterogeneous Robot Systems with Deep Reinforcement Learning](https://arxiv.org/pdf/2308.00331)|[Target Search and Navigation in Heterogeneous Robot Systems with Deep Reinforcement Learning](https://arxiv.org/pdf/2308.00331)]]
+			> [[_devlog####[SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning](https://arxiv.org/pdf/2604.24729v1)|[SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning](https://arxiv.org/pdf/2604.24729v1)]]
+			> [[_devlog####[Search Planning of a UAV-UGV Team with Localization Uncertainty in a Subterranean Environment](https://arxiv.org/pdf/2102.06069)|[Search Planning of a UAV-UGV Team with Localization Uncertainty in a Subterranean Environment](https://arxiv.org/pdf/2102.06069)]]
+			> [[_devlog####[Collaborative Multi-Robot Search and Rescue.. Planning, Coordination, Perception, and Active Vision](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9220149)|[Collaborative Multi-Robot Search and Rescue.. Planning, Coordination, Perception, and Active Vision](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9220149)]]
+			> [[_devlog####[A Heterogeneous Unmanned Ground Vehicle and Blimp Robot Team for Search and Rescue using Data-driven Autonomy and Communication-aware Navigation](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10876050)|[A Heterogeneous Unmanned Ground Vehicle and Blimp Robot Team for Search and Rescue using Data-driven Autonomy and Communication-aware Navigation](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10876050)]]
+		> [[_devlog###GitHub Repositories|GitHub Repositories]]
+				> [[_devlog#####[akhaled247/SpecRLBench](https://github.com/akhaled247/SpecRLBench)|[akhaled247/SpecRLBench](https://github.com/akhaled247/SpecRLBench)]]
+				> [[_devlog#####[akhaled247/BURISE-26](https://github.com/akhaled247/BURISE-26)|[akhaled247/BURISE-26](https://github.com/akhaled247/BURISE-26)]]
+> [[_devlog#07.03.26|07.03.26]]
+	> [[_devlog##Making Walls|Making Walls]]
+		> [[_devlog###Initial Setup|Initial Setup]]
+		> [[_devlog###Ringed Placements|Ringed Placements]]
+		> [[_devlog###Random Sizing|Random Sizing]]
+
+<!-- End of TOC -->
+
 #rise-dcl-log 
 
-```table-of-contents
-```
+
 # Sources
 [ROS Ubuntu Installation](https://wiki.ros.org/noetic/Installation/Ubuntu) \
 [Information Slideshow](https://docs.google.com/presentation/d/1C7Mwcdt3m7QfknjxOcZXIfugGhLVEKumrAQWOlkqRtM/edit?pli=1&slide=id.p#slide=id.p) \
@@ -203,27 +235,27 @@ I started the day out by trying to understand how environments are created. A ru
 After exploring the repository more, I was able to create my own custom task `multi-goal-level3` and my own gym wrapper `safety_gym_wrapper_ma_sro` and integrate them into the existing codebase.
 After that, I moved on to diving deeper into how simulation environments for search and rescue (SAR) environments are currently constructed. Below are all of the papers that I have analyzed so far to learn about how to make a new environment that would satisfy the goals outlined in the presentation provided. 
 ## 07.02.06 Papers
-##### [Unmanned Ground Robots for Rescue Tasks](https://www.intechopen.com/chapters/56080)
+#### [Unmanned Ground Robots for Rescue Tasks](https://www.intechopen.com/chapters/56080)
 Simulation uses a grid map, but also uses point-cloud mapping to construct a 3D visualization of the environment.
-##### [UAV-UGV Cooperative Trajectory Optimization and Task Allocation for Medical Rescue Tasks in Post-Disaster Environments](https://arxiv.org/pdf/2506.06136)
+#### [UAV-UGV Cooperative Trajectory Optimization and Task Allocation for Medical Rescue Tasks in Post-Disaster Environments](https://arxiv.org/pdf/2506.06136)
 Trying to create tasks for multiple agents, with each task being completed individually.
 Using [[Genetic Algorithm]]s, which are better for complex environments. Selects the highest-fitness individuals and mutates them.
 Each agent is assigned one task unique to them
 Minimum safety distance away from vehicle
 Obstacles represented as circles (zones!!!), all vehicles spawn in the same place
 https://github.com/Cherry0302/disaster_uav_ugv_rescue_planner
-##### [Target Search and Navigation in Heterogeneous Robot Systems with Deep Reinforcement Learning](https://arxiv.org/pdf/2308.00331)
+#### [Target Search and Navigation in Heterogeneous Robot Systems with Deep Reinforcement Learning](https://arxiv.org/pdf/2308.00331)
 ![Top view of the designed simulation environment for search and rescue in underground mine scenario](Images/topdown_env_research_paper.png)
 >[!quote]
 >The black lines denote the wall and the sphere-represented victim randomly appears in one of the two branches during the environment generation
-##### [SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning](https://arxiv.org/pdf/2604.24729v1)
+#### [SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning](https://arxiv.org/pdf/2604.24729v1)
 Benchmark for testing different spectulation-guided RL models (hence [SpecRLBench](SpecRLBench..%20A%20Benchmark%20for%20Generalization%20in%20Specification-Guided%20Reinforcement%20Learning.md) name). Currently, there are 19 environments to choose from, split between **navigation** and **manipulation** tasks. I don't understand how the environments are dynamically created, so I will have to look into that.
-##### [Search Planning of a UAV-UGV Team with Localization Uncertainty in a Subterranean Environment](https://arxiv.org/pdf/2102.06069)
+#### [Search Planning of a UAV-UGV Team with Localization Uncertainty in a Subterranean Environment](https://arxiv.org/pdf/2102.06069)
 ![Gazebo simulation environment that reflects a highway tunnel with some obstacles](Images/gazebosim.png)]
 Simulation environment was more realistic (using Gazebo simulator)
 - Included irregular models, but was essentially a cylinder cut in half and hollowed out
 - Sensors included LIDAR and two cameras -- one facing upwards, and one facing forwards. This was done to map out the entire environment since it was a 3D space (by contrast, the [SpecRLBench](SpecRLBench..%20A%20Benchmark%20for%20Generalization%20in%20Specification-Guided%20Reinforcement%20Learning.md) workspace is effectively 2.5D)
-##### [Collaborative Multi-Robot Search and Rescue.. Planning, Coordination, Perception, and Active Vision](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9220149)
+#### [Collaborative Multi-Robot Search and Rescue.. Planning, Coordination, Perception, and Active Vision](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9220149)
 Simulation for SAR environments should be more robust than traditional applications since the environment is often more complex than traditional environments.
 **Sim2Real** methods
 Important to consider noisy data, unbalanced data, and conflicting data as potential issues when abstracting away certain parameters
@@ -233,7 +265,7 @@ Important to consider noisy data, unbalanced data, and conflicting data as poten
 - Most often these are centralized, but decentralized approaches are more robust for the types of environments they operate in (especially SAR environments)
 - Market-based approaches and auctions
 - Liu et al. -- Potentially use a supervised system to adapt the robot when new situations occur
-##### [A Heterogeneous Unmanned Ground Vehicle and Blimp Robot Team for Search and Rescue using Data-driven Autonomy and Communication-aware Navigation](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10876050)
+#### [A Heterogeneous Unmanned Ground Vehicle and Blimp Robot Team for Search and Rescue using Data-driven Autonomy and Communication-aware Navigation](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10876050)
 Teams were given points based on how many "artifacts" they found and reported to the correct location (not individuals)
 UAVs and UGVs worked together to a) map out the environment and b) find the aforementioned artifacts (e.g. person, backpack, items, etc.)
 Real-world environments (not super helpful for understanding how simulations should be made)
@@ -243,9 +275,9 @@ Once I finished reading those papers, I constructed a mock-up of the environment
 ![MockUp of Robust MAS SAR Environment](Images/sare_initial_mockup_and_notes.png)
 The obstacles, victims, buildings, and humans will all be randomized (easier than static placements), and the agents will always spawn near the center. This way, there is a good balance between randomness (which is required to prevent an overfitted policy) and structure (since otherwise, the simulation would not be realistic).
 ### GitHub Repositories
-#### [akhaled247/SpecRLBench](https://github.com/akhaled247/SpecRLBench)
+##### [akhaled247/SpecRLBench](https://github.com/akhaled247/SpecRLBench)
 This is a fork of the SpecRLBench repository, where i am developing the environment as explains above.
-#### [akhaled247/BURISE-26](https://github.com/akhaled247/BURISE-26)
+##### [akhaled247/BURISE-26](https://github.com/akhaled247/BURISE-26)
 This is the repository where I'm housing the work that I have done. Currently, it just has the SpecRLBench submodule, but I may add other directories if needed.  [TODO: Ask for recommendation/permission to move repo to BU-DEPEND-LAB] 
 
 # 07.03.26
