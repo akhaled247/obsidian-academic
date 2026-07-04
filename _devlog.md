@@ -18,13 +18,6 @@
 	- [Setting up SpecRLBench](#setting-up-specrlbench)
 - [07-02-26](#07-02-26)
 	- [07-02-06 Papers](#07-02-06-papers)
-			- [[Unmanned Ground Robots for Rescue Tasks](https://www.intechopen.com/chapters/56080)](#unmanned-ground-robots-for-rescue-taskshttpswwwintechopencomchapters56080)
-			- [[UAV-UGV Cooperative Trajectory Optimization and Task Allocation for Medical Rescue Tasks in Post-Disaster Environments](https://arxiv.org/pdf/2506.06136)](#uav-ugv-cooperative-trajectory-optimization-and-task-allocation-for-medical-rescue-tasks-in-post-disaster-environmentshttpsarxivorgpdf250606136)
-			- [[Target Search and Navigation in Heterogeneous Robot Systems with Deep Reinforcement Learning](https://arxiv.org/pdf/2308.00331)](#target-search-and-navigation-in-heterogeneous-robot-systems-with-deep-reinforcement-learninghttpsarxivorgpdf230800331)
-			- [[SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning](https://arxiv.org/pdf/2604.24729v1)](#specrlbench-a-benchmark-for-generalization-in-specification-guided-reinforcement-learninghttpsarxivorgpdf260424729v1)
-			- [[Search Planning of a UAV-UGV Team with Localization Uncertainty in a Subterranean Environment](https://arxiv.org/pdf/2102.06069)](#search-planning-of-a-uav-ugv-team-with-localization-uncertainty-in-a-subterranean-environmenthttpsarxivorgpdf210206069)
-			- [[Collaborative Multi-Robot Search and Rescue.. Planning, Coordination, Perception, and Active Vision](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9220149)](#collaborative-multi-robot-search-and-rescue-planning-coordination-perception-and-active-visionhttpsieeexploreieeeorgstampstampjsptparnumber9220149)
-			- [[A Heterogeneous Unmanned Ground Vehicle and Blimp Robot Team for Search and Rescue using Data-driven Autonomy and Communication-aware Navigation](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10876050)](#a-heterogeneous-unmanned-ground-vehicle-and-blimp-robot-team-for-search-and-rescue-using-data-driven-autonomy-and-communication-aware-navigationhttpsieeexploreieeeorgstampstampjsparnumber10876050)
 		- [GitHub Repositories](#github-repositories)
 - [07-03-26](#07-03-26)
 	- [Making Walls](#making-walls)
@@ -37,6 +30,11 @@
 		- [Spawning Buildings](#spawning-buildings)
 - [07-04-26](#07-04-26)
 	- [Vision](#vision)
+	- [Casualties](#casualties)
+		- [Initial Thoughts](#initial-thoughts)
+		- [Surface](#surface)
+		- [Entrapped](#entrapped)
+
 # Sources
 [ROS Ubuntu Installation](https://wiki.ros.org/noetic/Installation/Ubuntu) \
 [Information Slideshow](https://docs.google.com/presentation/d/1C7Mwcdt3m7QfknjxOcZXIfugGhLVEKumrAQWOlkqRtM/edit?pli=1&slide=id.p#slide=id.p) \
@@ -199,7 +197,7 @@ instead of `./install.bash` because <u>a)</u> the script was `install.sh` and <u
   '.' is not recognized as an internal or external command,
   operable program or batch file.
 ```
-TODO: Learn how to make custom environments in gymnasium
+~~TODO: Learn how to make custom environments in gymnasium~~
 Create custom environment
 Lit review of current search-and-rescue operation environment definitions
 
@@ -214,7 +212,7 @@ I started the day out by trying to understand how environments are created. A ru
 `\base` - this is where all of the "template" files are included
 - `underlying` - the source of all of the base files
 - `base_task` - the template for creating tasks
-`\ltl` - the directory where all of the LTL-specific (TODO: WORDS NEEDED) are created
+`\ltl` - the directory where all of the LTL-specific tasks are created
 - `ltl_base_task` - built off of `base-task`, it allows the user to encode LTL tasks. Used by other ltl tasks in `\ltl`
 - *Note: These tasks must be imported into the `__init.py__` file in the `\tasks` directory*
 After exploring the repository more, I was able to create my own custom task `multi-goal-level3` and my own gym wrapper `safety_gym_wrapper_ma_sro` and integrate them into the existing codebase.
@@ -259,7 +257,7 @@ UAVs (blimps) were used in mazes and trajectories were mapped out
 Once I finished reading those papers, I constructed a mock-up of the environment and task that I hope to complete:
 ###### Mock-Up
 ![MockUp of Robust MAS SAR Environment](Images/sare_initial_mockup_and_notes.png) \
-The obstacles, victims, buildings, and humans will all be randomized (easier than static placements), and the agents will always spawn near the center. This way, there is a good balance between randomness (which is required to prevent an overfitted policy) and structure (since otherwise, the simulation would not be realistic).
+The obstacles, victims, buildings, and casualties will all be randomized (easier than static placements), and the agents will always spawn near the center. This way, there is a good balance between randomness (which is required to prevent an overfitted policy) and structure (since otherwise, the simulation would not be realistic).
 ### GitHub Repositories
 ##### [akhaled247/SpecRLBench](https://github.com/akhaled247/SpecRLBench)
 This is a fork of the SpecRLBench repository, where i am developing the environment as explains above.
@@ -296,7 +294,7 @@ So I changed how the random sizing was stored. Instead of a new instance of the 
 As you can see, the sizes are more randomized than before, and are also much more controlled in size. Since the `point` agents cannot jump over walls, (as of now), it didn't make sense for the walls to be super high. This also improves the UX, since more of the scene is visible at a time.
 ## Making Buildings
 ### Initial Thoughts
-As shown in my initial [mock-up](#mock-up), I wanted to make buildings that had "humans" in them, though I didn't want them to be directly spotted by the agent. Some of the humans would be easily visible (i.e. in the open), while others would be inside buildings. I felt like starting on the buildings first since they house the humans, but retrospectively I probably should have reversed the order. In any case, I knew that for the buildings, I wanted:
+As shown in my initial [mock-up](#mock-up), I wanted to make buildings that had "casualties" in them, though I didn't want them to be directly spotted by the agent. Some of the casualties would be easily visible (i.e. in the open), while others would be inside buildings. I felt like starting on the buildings first since they house the casualties, but retrospectively I probably should have reversed the order. In any case, I knew that for the buildings, I wanted:
 1. An opaque "shell" that LIDAR and vision could not penetrate. I didn't yet know, but LIDAR was going to be an interesting issue to tackle.
 2. It would have to be taller than the walls. This way, when vision is incorporated into the system, they will be visible over the walls. This is yet another reason why the walls should be shorter; in real-world applications, debris is likely not going to be taller/obstructing the view of collapsed buildings, improving the realism of the simulation
 3. It would need to be visually distinguishable for the user (personal preference, but better UX is good for this project, since it's for benchmarking)
@@ -308,7 +306,7 @@ I was able to take the `Zones(Geom)` class and refactored it for it to become a 
 1. Changed the `type` to `"box"` instead of `"cylinder"`
 2.  Added `placements`, `keepout`, and `alpha` parameters to incorporated `border_placements()` and visual changes
 3. Slimmed down the colors to <span style="color:light_grey"><code>light_gray</code></span> (to distinguish from `gray` walls), <span style="color:red">red</span>, <span style="color:yellow"><code>yellow</code></span>, and <span style="color:lime"><code>green</code></span>, the latter three of which I hope to incorporate into my costs as more risky candidates.
-Tomorrow, I plan on making the humans extended from the zones using `type:'capsule'`, which I think will be fun as well as informative. I plan on making some of them spawn in buildings and the rest spawn in the open. I think that humans in buildings will have higher rewards than those outside (since in real life, they are likely in worse condition due to debris, collapsed supports, etc.). EOD, here is what the environment looks like:
+Tomorrow, I plan on making the casualties extended from the zones using `type:'capsule'`, which I think will be fun as well as informative. I plan on making some of them spawn in buildings and the rest spawn in the open. I think that casualties in buildings will have higher rewards than those outside (since in real life, they are likely in worse condition due to debris, collapsed supports, etc.). EOD, here is what the environment looks like:
 ![View of the environment as of July 3rd, with agents, walls, and buildings](Images/buildings_one_point_perspective.png)
 # 07-04-26
 ## Vision
@@ -322,13 +320,36 @@ if self.observe_vision:
 		obs[name] = self._obs_vision(camera_name=name)
 ```
 \ This way, the vision camera creation was agent-number-agnostic. This code was already somewhat implemented between the lidar sensors and the manual setting from the one-agent system, so I was able to extrapolate into this condition.
-After that, the vision worked! In the `obs` keys, `vision_0,1,...` is registered, and with the proper formatting (since I used `_obs_vision()`, I didn't have to configure that). However, since the camera renders with the same methods as the rendering for humans, I made this little helper statement:
+After that, the vision worked! In the `obs` keys, `vision_0,1,...` is registered, and with the proper formatting (since I used `_obs_vision()`, I didn't have to configure that). However, since the camera renders with the same methods as the rendering for casualties, I made this little helper statement:
 ```python
-render_mode = "human" if 'Vision' not in env_name else None
+render_mode = "casualty" if 'Vision' not in env_name else None
 env = make_env(env_name, render_mode=render_mode)
 ``` 
 That way, I/user don't have to worry about whether we've set the `render_mode` correctly, which makes this easier to use. 1AM Update:
-![](Images/agent_fpp_of_env.png) \
+![](Images/agent_fpp_of_env.png) 
+## Casualties
+### Initial Thoughts
+As I mentioned yesterday,
+>[!quote]
+I plan on making some of them spawn in buildings and the rest spawn in the open. I think that casualties in buildings will have higher rewards than those outside (since in real life, they are likely in worse condition due to debris, collapsed supports, etc.)
+
+But today, I wanted to get more into the granularities of what that meant. So, here were some of the criteria I outlined:
+1. Uses the model type `capsule`, since that is the most representative of a casualty—though I may add a model in the future, it isn't strictly necessary as of current.
+2. There should be two types of casualties; one that is outside and spawns in randomly throughout the map, and one that specifically spawns in buildings.
+	1. These casualty types should also be distinguishable through some way so that when making the rewards, I can specify which one has higher reward
+3. The total of these casualties should add up to the number of agents (for now). Since LTL is not yet implemented for this environment, the agent can't really do multiple tasks sequentially
+4. Building casualties should spawn inside buildings (obviously)
+*Note: If looking at the code, I created the class called `Casualtys` since it would turn into `var_casualty` during the actual environment building. I know that's not how you spell it, but it made the workflow more modular.*
+### Surface
+Once again, I was able to reuse the `Zones` geom class for the surface casualties, simply chaging the type to the capsule and adjusting some of the color options to be more in line with what I wanted. Like the buildings, I made them opaque, gave them the ability to have custom `locations` and `placements`, and adjusted the `size` parameters accordingly.
+### Entrapped
+Now, making the entrapped casualties was more challenging than the surface ones, since I had to make them sync up with the building locations (which were at-time being set randomly by the [border placements](#border-placements)). The first thing I tried to do was retrieve the `pos` of the buildings. First, I head to retrieve the attributes of the Building class using `dir(self._geoms.get('light_gray_buildings')`. From there, I found out the `pos()` method, (I could've also checked the `buildings.py` class and seen it there), and was able to call it using `self._geoms.get('light_gray_buildings').pos()`, which returned a list of triples. However, I was calling this in the `specific_reset()` method since those positions weren't yet initialized in the `_build()` method. This meant that I could not modify the positions of the entrapped casualties within that reset method.
+From there, I pivoted to what I had done for the `Walls`, since those required randomized sizes that were cached at the initial startup build. I realized that I could use a similar idea to what I did there, but instead of making the sizes, I would be making `locations`. Using the `border_placements()` code as a foundation, I made a wrapper method called `border_locations()` that took in the border parameters as well as the `num` of buildings being spawned in, the `RandomGenerator` object of the task, and `keepout` for the `draw_placements()` method I recycled from the `RandomGenerator` class. The method returns "a list of (x, y) locations from the `random_generator` that can be used when updating locations in the `_build()` method of a task."
+When I first tested it out, though, the simulation would not load. At the time, I assumed it had to be because of the locations generating inside one of the other objects, and I was right! After creating a [Desmos graph](https://www.desmos.com/calculator/bcqjpzneh6) to help me visualize the parameters I had set, I saw that there was some overlap between the placements of the Walls and Buildings. After tweaking the parameters and checking the simulation multiple times, I ended up with the params you can see in the graph. The sim now loads in ~5 seconds, which is pretty good considering all of the walls, casualties, and buildings it has to loads, and there isn't interference between the objects.
+#### Additional Initial Setup
+Since there were more geoms I was editing in the `_build()` method, I created a `_replace_geom()` method that allowed me to replace geometries more easily in the multi-agent environment. I also made it so that there were fewer entrapped casualties than surface casualties (but still had them add up to `num_agents`) [TODO: Find more research determining this ratio and incorporate it into the environment]. I also changed the colors of the buildings to be more building-like and help distinguish them from the walls. I also added a `debug` attribute to the `Buildings` class so that I could make them translucent when I want to see if the entrapped casualties have been spawned correctly but also make them easy to turn solid (e.g. when using vision). Current progress: ![](Images/humans_onepoint_view.png)
+\
+Next, I want to show this to Zijian to get approval to continue making the policy wrapper, which will definitely be interesting.
 
 --- 
-#project/idea
+#project/idea 
