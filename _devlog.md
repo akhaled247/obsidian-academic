@@ -4,7 +4,6 @@
 	#rise-dcl-log
 </details> 
 
-
 # Table of Contents
 - [Sources](#sources)
 - [Papers](#papers)
@@ -37,7 +36,7 @@
 		- [Border Placement](#border-placement)
 		- [Spawning Buildings](#spawning-buildings)
 - [07-04-26](#07-04-26)
-
+	- [Vision](#vision)
 # Sources
 [ROS Ubuntu Installation](https://wiki.ros.org/noetic/Installation/Ubuntu) \
 [Information Slideshow](https://docs.google.com/presentation/d/1C7Mwcdt3m7QfknjxOcZXIfugGhLVEKumrAQWOlkqRtM/edit?pli=1&slide=id.p#slide=id.p) \
@@ -231,13 +230,13 @@ Minimum safety distance away from vehicle
 Obstacles represented as circles (zones!!!), all vehicles spawn in the same place
 https://github.com/Cherry0302/disaster_uav_ugv_rescue_planner
 #### [Target Search and Navigation in Heterogeneous Robot Systems with Deep Reinforcement Learning](https://arxiv.org/pdf/2308.00331)
-![Top view of the designed simulation environment for search and rescue in underground mine scenario](Images/mazelike_topdown_env.png)
+![Top view of the designed simulation environment for search and rescue in underground mine scenario](Images/mazelike_topdown_env.png) \
 >[!quote]
 >The black lines denote the wall and the sphere-represented victim randomly appears in one of the two branches during the environment generation
 #### [SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning](https://arxiv.org/pdf/2604.24729v1)
 Benchmark for testing different spectulation-guided RL models (hence [SpecRLBench](SpecRLBench..%20A%20Benchmark%20for%20Generalization%20in%20Specification-Guided%20Reinforcement%20Learning.md) name). Currently, there are 19 environments to choose from, split between **navigation** and **manipulation** tasks. I don't understand how the environments are dynamically created, so I will have to look into that.
 #### [Search Planning of a UAV-UGV Team with Localization Uncertainty in a Subterranean Environment](https://arxiv.org/pdf/2102.06069)
-![Gazebo simulation environment that reflects a highway tunnel with some obstacles](Images/gazebosim.png)]
+![Gazebo simulation environment that reflects a highway tunnel with some obstacles](Images/gazebosim.png) \
 Simulation environment was more realistic (using Gazebo simulator)
 - Included irregular models, but was essentially a cylinder cut in half and hollowed out
 - Sensors included LIDAR and two cameras -- one facing upwards, and one facing forwards. This was done to map out the entire environment since it was a 3D space (by contrast, the [SpecRLBench](SpecRLBench..%20A%20Benchmark%20for%20Generalization%20in%20Specification-Guided%20Reinforcement%20Learning.md) workspace is effectively 2.5D)
@@ -259,7 +258,7 @@ UAVs (blimps) were used in mazes and trajectories were mapped out
 
 Once I finished reading those papers, I constructed a mock-up of the environment and task that I hope to complete:
 ###### Mock-Up
-![MockUp of Robust MAS SAR Environment](Images/sare_initial_mockup_and_notes.png)
+![MockUp of Robust MAS SAR Environment](Images/sare_initial_mockup_and_notes.png) \
 The obstacles, victims, buildings, and humans will all be randomized (easier than static placements), and the agents will always spawn near the center. This way, there is a good balance between randomness (which is required to prevent an overfitted policy) and structure (since otherwise, the simulation would not be realistic).
 ### GitHub Repositories
 ##### [akhaled247/SpecRLBench](https://github.com/akhaled247/SpecRLBench)
@@ -289,11 +288,11 @@ So, I started working on making the walls spawn in a specified ring. Below were 
 3. Walls had to be able to be placed randomly along that ring: I didn't want them to spawn in the same place every time
 4. Wall spawning would ideally be controlled by `random_generator.py`. This way, the initial seed would be the sole determinant of the randomness, meaning that the simulation wouldn't change between runs unless the seed was changed
 I first started with trying to understand how the `placements` attribute worked for geoms, which I found explained [here](https://safety-gymnasium.readthedocs.io/en/latest/components_of_environments/objects.html#general-parameters) in the safety-gym docs. I learned that placements are boxes, constrained by (x,y) coordinates from the origin, that specify a region that the object's origin can be located. Placements can either be a single 4-tuple (i.e. `(x_min, y_min, x_max, y_max)`) or they can be a 1D array of these regions (i.e. a `list`). However, there was an issue since I wanted a ring, I would have to take multiple samples along the ring radius and create boxes from them. Therefore, I had to convert the polar coordinates `(r, θ)` into `(x, y)` using trigonometry, then created a box with dimensions `2 * margin` around that central point. I used `WALL_COUNT` samples so that the walls would be approximately spaced around the ring, and forced the margin to be larger than the `keepout` (if no margin specified). That created an environment that looked like this:
-![Top-down View of the SARE with randomly placed walls around a ring](Images/ringed_placements_topdown_env.png)
+![Top-down View of the SARE with randomly placed walls around a ring](Images/ringed_placements_topdown_env.png) 
 ### Random Sizing
 However, I also wanted the sizes of the walls to be different. So, I initially created a method (taking code from the `ring_placements()` method) that allowed me to create `n` len=3 arrays that would output `[x, y, z]` so that the dimensions were random every time. That was a little *too* random, though: each run, instead of preserving the values based on the original seed, the method would return a new list of half_sizes. This was because I was using `np.random` to create the lists rather than `self.random_generator` because the latter does not initialize until after `reset()` has been called in the task.
 So I changed how the random sizing was stored. Instead of a new instance of the list being created every time the `test_env.py` is run, there is a `_cached_wall_half_sizes` variable that is initially set to `None` in the class scope. Then, when the `_build()` method is called (which happens after `reset()`), `size_randomization(base_half_sizes, num, margins, random_generator=self.random_generator)` is called. This value is then cached in the task, so that when the env is run again, it loads the existing values instead. This way, for each seed `s`, the agent will see a reproducible environment, allowing the user more control over the simulation params. With those changes implemented, the following environment was generated:
-![Top-down View of the SARE with ringed size-random walls](Images/random_sizes_topdown_env.png)
+![Top-down View of the SARE with ringed size-random walls](Images/random_sizes_topdown_env.png) \
 As you can see, the sizes are more randomized than before, and are also much more controlled in size. Since the `point` agents cannot jump over walls, (as of now), it didn't make sense for the walls to be super high. This also improves the UX, since more of the scene is visible at a time.
 ## Making Buildings
 ### Initial Thoughts
@@ -312,6 +311,24 @@ I was able to take the `Zones(Geom)` class and refactored it for it to become a 
 Tomorrow, I plan on making the humans extended from the zones using `type:'capsule'`, which I think will be fun as well as informative. I plan on making some of them spawn in buildings and the rest spawn in the open. I think that humans in buildings will have higher rewards than those outside (since in real life, they are likely in worse condition due to debris, collapsed supports, etc.). EOD, here is what the environment looks like:
 ![View of the environment as of July 3rd, with agents, walls, and buildings](Images/buildings_one_point_perspective.png)
 # 07-04-26
+## Vision
+It was midnight, but I wanted to do something, and I knew that vision was already implemented in the single agent LTL environments, so I hoped that it would not be too difficult to transfer over. Here is what I changed to make vision work. *Note: vision cameras already existed on the `xml` files of the `Point` agents, so most of this was just debugging the `\base` code to work with multiple agents*
+1. In the `__init__.py` file of the package where all of the envs are created, I dropped the `{PREFIX}` from the vision environment creation code so that it didn't have `"Safety"` at the start. Made it more simple when debugging.
+2. In the `obs()` method in `base_task.py` I inserted the following code:
+```python
+if self.observe_vision:
+	for i in range(self.agent.agent_num):
+		name = f'vision_{i}'
+		obs[name] = self._obs_vision(camera_name=name)
+```
+\ This way, the vision camera creation was agent-number-agnostic. This code was already somewhat implemented between the lidar sensors and the manual setting from the one-agent system, so I was able to extrapolate into this condition.
+After that, the vision worked! In the `obs` keys, `vision_0,1,...` is registered, and with the proper formatting (since I used `_obs_vision()`, I didn't have to configure that). However, since the camera renders with the same methods as the rendering for humans, I made this little helper statement:
+```python
+render_mode = "human" if 'Vision' not in env_name else None
+env = make_env(env_name, render_mode=render_mode)
+``` 
+That way, I/user don't have to worry about whether we've set the `render_mode` correctly, which makes this easier to use. 1AM Update:
+![](Images/agent_fpp_of_env.png) \
 
 --- 
 #project/idea
