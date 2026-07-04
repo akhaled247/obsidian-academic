@@ -12,7 +12,7 @@ Created:
   - "[[02-07-2026]]"
 URL: https://arxiv.org/pdf/2308.00331
 ---
-![[Images/topdown_env_research_paper.png|603]]
+![[Images/mazelike_topdown_env.png|603]]
 >[!quote]
 >The black lines denote the wall and the sphere-represented victim randomly appears in one of the two branches during the environment generation
 

@@ -1,56 +1,42 @@
----
-aliases:
-  - <%tp.file.cursor()%>
-subset: []
-Created:
-  - <% tp.file.include("[[templates/timestamp note]]") %>
-worksIn: []
-for: []
-isA: []
-by:
-  - "[[Abdullah Khaled]]"
-at: []
-hasTopic:
-  - "[[SpecRLBench]]"
-year: "[[2026]]"
-with:
-score:
----
-<!-- Table of Contents arrowType: - | title: Table of Contents  | codeBlocks: y -->
+<details>
+	<summary><i>Obsidian Properties Screenshot</i></summary>
+	<img src="Images/devlog_properties.png">
+	#rise-dcl-log
+</details> 
+
+
 # Table of Contents
-- [[_devlog#Sources|Sources]]
-- [[_devlog#Papers|Papers]]
-- [[_devlog#06.29.2026|06.29.2026]]
-	- [[_devlog##Old Command|Old Command]]
-	- [[_devlog##New Command|New Command]]
-- [[_devlog#06.30.2026|06.30.2026]]
-	- [[_devlog##Issues & Solutions|Issues & Solutions]]
-	- [[_devlog##New Understandings|New Understandings]]
-- [[_devlog#07.01.26|07.01.26]]
-	- [[_devlog##Instructions for SpecRLBench Dev|Instructions for SpecRLBench Dev]]
-	- [[_devlog##Setting up SpecRLBench|Setting up SpecRLBench]]
-- [[_devlog#07.02.26|07.02.26]]
-	- [[_devlog##07.02.06 Papers|07.02.06 Papers]]
-			- [[_devlog####[Unmanned Ground Robots for Rescue Tasks](https://www.intechopen.com/chapters/56080)|[Unmanned Ground Robots for Rescue Tasks](https://www.intechopen.com/chapters/56080)]]
-			- [[_devlog####[UAV-UGV Cooperative Trajectory Optimization and Task Allocation for Medical Rescue Tasks in Post-Disaster Environments](https://arxiv.org/pdf/2506.06136)|[UAV-UGV Cooperative Trajectory Optimization and Task Allocation for Medical Rescue Tasks in Post-Disaster Environments](https://arxiv.org/pdf/2506.06136)]]
-			- [[_devlog####[Target Search and Navigation in Heterogeneous Robot Systems with Deep Reinforcement Learning](https://arxiv.org/pdf/2308.00331)|[Target Search and Navigation in Heterogeneous Robot Systems with Deep Reinforcement Learning](https://arxiv.org/pdf/2308.00331)]]
-			- [[_devlog####[SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning](https://arxiv.org/pdf/2604.24729v1)|[SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning](https://arxiv.org/pdf/2604.24729v1)]]
-			- [[_devlog####[Search Planning of a UAV-UGV Team with Localization Uncertainty in a Subterranean Environment](https://arxiv.org/pdf/2102.06069)|[Search Planning of a UAV-UGV Team with Localization Uncertainty in a Subterranean Environment](https://arxiv.org/pdf/2102.06069)]]
-			- [[_devlog####[Collaborative Multi-Robot Search and Rescue.. Planning, Coordination, Perception, and Active Vision](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9220149)|[Collaborative Multi-Robot Search and Rescue.. Planning, Coordination, Perception, and Active Vision](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9220149)]]
-			- [[_devlog####[A Heterogeneous Unmanned Ground Vehicle and Blimp Robot Team for Search and Rescue using Data-driven Autonomy and Communication-aware Navigation](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10876050)|[A Heterogeneous Unmanned Ground Vehicle and Blimp Robot Team for Search and Rescue using Data-driven Autonomy and Communication-aware Navigation](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10876050)]]
-		- [[_devlog###GitHub Repositories|GitHub Repositories]]
-				- [[_devlog#####[akhaled247/SpecRLBench](https://github.com/akhaled247/SpecRLBench)|[akhaled247/SpecRLBench](https://github.com/akhaled247/SpecRLBench)]]
-				- [[_devlog#####[akhaled247/BURISE-26](https://github.com/akhaled247/BURISE-26)|[akhaled247/BURISE-26](https://github.com/akhaled247/BURISE-26)]]
-- [[_devlog#07.03.26|07.03.26]]
-	- [[_devlog##Making Walls|Making Walls]]
-		- [[_devlog###Initial Setup|Initial Setup]]
-		- [[_devlog###Ringed Placements|Ringed Placements]]
-		- [[_devlog###Random Sizing|Random Sizing]]
-
-<!-- End of TOC -->
-
-#rise-dcl-log 
-
+- [Sources](#sources)
+- [Papers](#papers)
+- [06-29-26](#06-29-26)
+	- [Old Command](#old-command)
+	- [New Command](#new-command)
+- [06-30-26](#06-30-26)
+	- [Issues & Solutions](#issues--solutions)
+	- [New Understandings](#new-understandings)
+- [07-01-26](#07-01-26)
+	- [Instructions for SpecRLBench Dev](#instructions-for-specrlbench-dev)
+	- [Setting up SpecRLBench](#setting-up-specrlbench)
+- [07-02-26](#07-02-26)
+	- [07-02-06 Papers](#07-02-06-papers)
+			- [[Unmanned Ground Robots for Rescue Tasks](https://www.intechopen.com/chapters/56080)](#unmanned-ground-robots-for-rescue-taskshttpswwwintechopencomchapters56080)
+			- [[UAV-UGV Cooperative Trajectory Optimization and Task Allocation for Medical Rescue Tasks in Post-Disaster Environments](https://arxiv.org/pdf/2506.06136)](#uav-ugv-cooperative-trajectory-optimization-and-task-allocation-for-medical-rescue-tasks-in-post-disaster-environmentshttpsarxivorgpdf250606136)
+			- [[Target Search and Navigation in Heterogeneous Robot Systems with Deep Reinforcement Learning](https://arxiv.org/pdf/2308.00331)](#target-search-and-navigation-in-heterogeneous-robot-systems-with-deep-reinforcement-learninghttpsarxivorgpdf230800331)
+			- [[SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning](https://arxiv.org/pdf/2604.24729v1)](#specrlbench-a-benchmark-for-generalization-in-specification-guided-reinforcement-learninghttpsarxivorgpdf260424729v1)
+			- [[Search Planning of a UAV-UGV Team with Localization Uncertainty in a Subterranean Environment](https://arxiv.org/pdf/2102.06069)](#search-planning-of-a-uav-ugv-team-with-localization-uncertainty-in-a-subterranean-environmenthttpsarxivorgpdf210206069)
+			- [[Collaborative Multi-Robot Search and Rescue.. Planning, Coordination, Perception, and Active Vision](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9220149)](#collaborative-multi-robot-search-and-rescue-planning-coordination-perception-and-active-visionhttpsieeexploreieeeorgstampstampjsptparnumber9220149)
+			- [[A Heterogeneous Unmanned Ground Vehicle and Blimp Robot Team for Search and Rescue using Data-driven Autonomy and Communication-aware Navigation](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10876050)](#a-heterogeneous-unmanned-ground-vehicle-and-blimp-robot-team-for-search-and-rescue-using-data-driven-autonomy-and-communication-aware-navigationhttpsieeexploreieeeorgstampstampjsparnumber10876050)
+		- [GitHub Repositories](#github-repositories)
+- [07-03-26](#07-03-26)
+	- [Making Walls](#making-walls)
+		- [Initial Setup](#initial-setup)
+		- [Ringed Placements](#ringed-placements)
+		- [Random Sizing](#random-sizing)
+	- [Making Buildings](#making-buildings)
+		- [Initial Thoughts](#initial-thoughts)
+		- [Border Placement](#border-placement)
+		- [Spawning Buildings](#spawning-buildings)
+- [07-04-26](#07-04-26)
 
 # Sources
 [ROS Ubuntu Installation](https://wiki.ros.org/noetic/Installation/Ubuntu) \
@@ -75,7 +61,7 @@ score:
 | https://arxiv.org/pdf/2102.06069                                 |
 | https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9220149 |
 | https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10876050    |
-# 06.29.2026
+# 06-29-26
 We attempted to set up ROS Noetic on Ubuntu 20.04 within a docker container within a remote desktop. Initially, this is the command we chose:
 ## Old Command
 
@@ -160,8 +146,8 @@ cd /ros_ws/src/sawyer_simulator/sawyer_gazebo/src/head_interface.cpp line 71:
  . devel/setup.bash
  roslaunch sawyer_sim_examples sawyer_pick_and_place_demo.launch
 ```
-# 06.30.2026
-We are now trying to see the simulator in the remote desktop via NoMachine. Before, we had SSHed into the remote desktop using `ssh <user>@10.210.22.197`, but since we needed the Gazebo simulation visualizer to actually understand what was happening, so we had to set up a remote desktop.
+# 06-30-26
+We are now trying to see the simulator in the remote desktop via NoMachine. Before, we had SSHed into the remote desktop using `ssh <user>@10.210-22-197`, but since we needed the Gazebo simulation visualizer to actually understand what was happening, so we had to set up a remote desktop.
 *Note: make sure you ssh out of the device before connecting with remote desktop connection
 `pkill -u $USER -f Xorg`*
 ## Issues & Solutions
@@ -185,7 +171,7 @@ We are now trying to see the simulator in the remote desktop via NoMachine. Befo
 * Learned more about the CLI, especially became comfortable with `nano` in Linux
 * Understood `try except finally` blocks and how to handle exceptions gracefully
 * Learned Python class structure through the creation of the `DataSubcriber` class
-# 07.01.26
+# 07-01-26
 I talked with Zijian about his project and received confirmation from Dr. Li to work with Zijian on [SpecRLBench](https://github.com/BU-DEPEND-Lab/SpecRLBench), with the following instructions:
 ## Instructions for SpecRLBench Dev
 - Try out the current SpecRLBench, getting familiar with the Gym setup
@@ -202,7 +188,7 @@ As part of this training, I have learned
 
 ## Setting up SpecRLBench
 Unlike in the tutorial, I didn't have to run `cd specbench` since the install file was in the main folder  
-I also had to run these commands
+I also had to run these commands:
 ```bash
 pip install -e .
 pip install -e specbench/envs/panda-gym
@@ -220,7 +206,7 @@ Lit review of current search-and-rescue operation environment definitions
 
 I then started exploring more into the `safety-gymnasium` and its environments, and found the [Building Button](https://safety-gymnasium.readthedocs.io/en/latest/environments/safe_vision/building_button.html) environment, which seems to be similar to the search-and-rescue operations I am interested in. This env also incorporates vision (optional), which is something I can look into.
 
-# 07.02.26
+# 07-02-26
 
 I started the day out by trying to understand how environments are created. A running list of classes I have found are below:
 `builder.py` - this is the builder of the environments, which is where the world is constructed (inluding obstacles) \
@@ -234,7 +220,7 @@ I started the day out by trying to understand how environments are created. A ru
 - *Note: These tasks must be imported into the `__init.py__` file in the `\tasks` directory*
 After exploring the repository more, I was able to create my own custom task `multi-goal-level3` and my own gym wrapper `safety_gym_wrapper_ma_sro` and integrate them into the existing codebase.
 After that, I moved on to diving deeper into how simulation environments for search and rescue (SAR) environments are currently constructed. Below are all of the papers that I have analyzed so far to learn about how to make a new environment that would satisfy the goals outlined in the presentation provided. 
-## 07.02.06 Papers
+## 07-02-06 Papers
 #### [Unmanned Ground Robots for Rescue Tasks](https://www.intechopen.com/chapters/56080)
 Simulation uses a grid map, but also uses point-cloud mapping to construct a 3D visualization of the environment.
 #### [UAV-UGV Cooperative Trajectory Optimization and Task Allocation for Medical Rescue Tasks in Post-Disaster Environments](https://arxiv.org/pdf/2506.06136)
@@ -245,7 +231,7 @@ Minimum safety distance away from vehicle
 Obstacles represented as circles (zones!!!), all vehicles spawn in the same place
 https://github.com/Cherry0302/disaster_uav_ugv_rescue_planner
 #### [Target Search and Navigation in Heterogeneous Robot Systems with Deep Reinforcement Learning](https://arxiv.org/pdf/2308.00331)
-![Top view of the designed simulation environment for search and rescue in underground mine scenario](Images/topdown_env_research_paper.png)
+![Top view of the designed simulation environment for search and rescue in underground mine scenario](Images/mazelike_topdown_env.png)
 >[!quote]
 >The black lines denote the wall and the sphere-represented victim randomly appears in one of the two branches during the environment generation
 #### [SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning](https://arxiv.org/pdf/2604.24729v1)
@@ -272,6 +258,7 @@ Real-world environments (not super helpful for understanding how simulations sho
 UAVs (blimps) were used in mazes and trajectories were mapped out
 
 Once I finished reading those papers, I constructed a mock-up of the environment and task that I hope to complete:
+###### Mock-Up
 ![MockUp of Robust MAS SAR Environment](Images/sare_initial_mockup_and_notes.png)
 The obstacles, victims, buildings, and humans will all be randomized (easier than static placements), and the agents will always spawn near the center. This way, there is a good balance between randomness (which is required to prevent an overfitted policy) and structure (since otherwise, the simulation would not be realistic).
 ### GitHub Repositories
@@ -280,7 +267,7 @@ This is a fork of the SpecRLBench repository, where i am developing the environm
 ##### [akhaled247/BURISE-26](https://github.com/akhaled247/BURISE-26)
 This is the repository where I'm housing the work that I have done. Currently, it just has the SpecRLBench submodule, but I may add other directories if needed.  [TODO: Ask for recommendation/permission to move repo to BU-DEPEND-LAB] 
 
-# 07.03.26
+# 07-03-26
 We have off since it's a federal holiday, but I wanted to continue working on at least the task environment so that it was easier to implement higher-level features nearing the end of my internship.
 I keep getting this error,
 ```sh
@@ -302,13 +289,29 @@ So, I started working on making the walls spawn in a specified ring. Below were 
 3. Walls had to be able to be placed randomly along that ring: I didn't want them to spawn in the same place every time
 4. Wall spawning would ideally be controlled by `random_generator.py`. This way, the initial seed would be the sole determinant of the randomness, meaning that the simulation wouldn't change between runs unless the seed was changed
 I first started with trying to understand how the `placements` attribute worked for geoms, which I found explained [here](https://safety-gymnasium.readthedocs.io/en/latest/components_of_environments/objects.html#general-parameters) in the safety-gym docs. I learned that placements are boxes, constrained by (x,y) coordinates from the origin, that specify a region that the object's origin can be located. Placements can either be a single 4-tuple (i.e. `(x_min, y_min, x_max, y_max)`) or they can be a 1D array of these regions (i.e. a `list`). However, there was an issue since I wanted a ring, I would have to take multiple samples along the ring radius and create boxes from them. Therefore, I had to convert the polar coordinates `(r, θ)` into `(x, y)` using trigonometry, then created a box with dimensions `2 * margin` around that central point. I used `WALL_COUNT` samples so that the walls would be approximately spaced around the ring, and forced the margin to be larger than the `keepout` (if no margin specified). That created an environment that looked like this:
-![Top-down View of the SARE with randomly placed walls around a ring](Images/topdown_env_ringed_placements.png)
+![Top-down View of the SARE with randomly placed walls around a ring](Images/ringed_placements_topdown_env.png)
 ### Random Sizing
 However, I also wanted the sizes of the walls to be different. So, I initially created a method (taking code from the `ring_placements()` method) that allowed me to create `n` len=3 arrays that would output `[x, y, z]` so that the dimensions were random every time. That was a little *too* random, though: each run, instead of preserving the values based on the original seed, the method would return a new list of half_sizes. This was because I was using `np.random` to create the lists rather than `self.random_generator` because the latter does not initialize until after `reset()` has been called in the task.
 So I changed how the random sizing was stored. Instead of a new instance of the list being created every time the `test_env.py` is run, there is a `_cached_wall_half_sizes` variable that is initially set to `None` in the class scope. Then, when the `_build()` method is called (which happens after `reset()`), `size_randomization(base_half_sizes, num, margins, random_generator=self.random_generator)` is called. This value is then cached in the task, so that when the env is run again, it loads the existing values instead. This way, for each seed `s`, the agent will see a reproducible environment, allowing the user more control over the simulation params. With those changes implemented, the following environment was generated:
-![Top-down View of the SARE with ringed size-random walls](Images/topdown_env_random_sizes.png)
+![Top-down View of the SARE with ringed size-random walls](Images/random_sizes_topdown_env.png)
 As you can see, the sizes are more randomized than before, and are also much more controlled in size. Since the `point` agents cannot jump over walls, (as of now), it didn't make sense for the walls to be super high. This also improves the UX, since more of the scene is visible at a time.
-
+## Making Buildings
+### Initial Thoughts
+As shown in my initial [mock-up](#mock-up), I wanted to make buildings that had "humans" in them, though I didn't want them to be directly spotted by the agent. Some of the humans would be easily visible (i.e. in the open), while others would be inside buildings. I felt like starting on the buildings first since they house the humans, but retrospectively I probably should have reversed the order. In any case, I knew that for the buildings, I wanted:
+1. An opaque "shell" that LIDAR and vision could not penetrate. I didn't yet know, but LIDAR was going to be an interesting issue to tackle.
+2. It would have to be taller than the walls. This way, when vision is incorporated into the system, they will be visible over the walls. This is yet another reason why the walls should be shorter; in real-world applications, debris is likely not going to be taller/obstructing the view of collapsed buildings, improving the realism of the simulation
+3. It would need to be visually distinguishable for the user (personal preference, but better UX is good for this project, since it's for benchmarking)
+4. I wanted buildings to be situated on the outskirts of the environment, but not in a ring (since the corners were good places for the buildings to go)
+### Border Placement
+After incorporating [ringed placements](#ringed-placements) when creating the walls, I simply reconfigured that code for the borders. Since I already had an understanding of the `placements` format at this point, it didn't take as long to set this up as it did the first time. Now, when `border_placements()` is called, it creates a "picture frame" that is hollow in the inside so that buildings only spawn on the outskirts of the SARE.
+### Spawning Buildings
+I was able to take the `Zones(Geom)` class and refactored it for it to become a building. The changes I made are listed below:
+1. Changed the `type` to `"box"` instead of `"cylinder"`
+2.  Added `placements`, `keepout`, and `alpha` parameters to incorporated `border_placements()` and visual changes
+3. Slimmed down the colors to <span style="color:light_grey"><code>light_gray</code></span> (to distinguish from `gray` walls), <span style="color:red">red</span>, <span style="color:yellow"><code>yellow</code></span>, and <span style="color:lime"><code>green</code></span>, the latter three of which I hope to incorporate into my costs as more risky candidates.
+Tomorrow, I plan on making the humans extended from the zones using `type:'capsule'`, which I think will be fun as well as informative. I plan on making some of them spawn in buildings and the rest spawn in the open. I think that humans in buildings will have higher rewards than those outside (since in real life, they are likely in worse condition due to debris, collapsed supports, etc.). EOD, here is what the environment looks like:
+![View of the environment as of July 3rd, with agents, walls, and buildings](Images/buildings_one_point_perspective.png)
+# 07-04-26
 
 --- 
 #project/idea
