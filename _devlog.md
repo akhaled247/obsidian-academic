@@ -89,7 +89,7 @@ docker run -it \
   
 docker exec -it ros_noetic bash
 ```
-After that, we had to install the rest of the ROS suite, which we completed using these commands. *Note: the Sawyer robot repo is years out of date, so some of the dependencies were outdated. We just tried our best with what we had and ignored the useless depends.*
+After that, we had to install the rest of the ROS suite, which we completed using these commands. \ *Note: the Sawyer robot repo is years out of date, so some of the dependencies were outdated. We just tried our best with what we had and ignored the useless depends.*
 ```sh
 apt update
 apt-get install git-core python3-wstool python3-vcstools python3-rosdep ros-noetic-control-msgs ros-noetic-joystick-drivers ros-noetic-xacro ros-noetic-tf2-ros ros-noetic-rviz ros-noetic-cv-bridge ros-noetic-actionlib ros-noetic-actionlib-msgs ros-noetic-dynamic-reconfigure ros-noetic-trajectory-msgs ros-noetic-rospy-message-converter
@@ -144,7 +144,7 @@ cd /ros_ws/src/sawyer_simulator/sawyer_gazebo/src/head_interface.cpp line 71:
  roslaunch sawyer_sim_examples sawyer_pick_and_place_demo.launch
 ```
 # 06-30-26
-We are now trying to see the simulator in the remote desktop via NoMachine. Before, we had SSHed into the remote desktop using `ssh <user>@10.210-22-197`, but since we needed the Gazebo simulation visualizer to actually understand what was happening, so we had to set up a remote desktop.
+We are now trying to see the simulator in the remote desktop via NoMachine. Before, we had SSHed into the remote desktop using `ssh <user>@10.210-22-197`, but since we needed the Gazebo simulation visualizer to actually understand what was happening, so we had to set up a remote desktop. \
 *Note: make sure you ssh out of the device before connecting with remote desktop connection
 `pkill -u $USER -f Xorg`*
 ## Issues & Solutions
@@ -180,7 +180,7 @@ I talked with Zijian about his project and received confirmation from Dr. Li to 
 Towards these goals, I started learning the foundational skills and frameworks that SpecRLBench is using, which I am tracking in [RISE Python Training](https://github.com/akhaled247/rise_python_training/tree/main)
 As part of this training, I have learned
 - Python syntax for control systems, classes, and overall how code is structured in Python
-- Gymnasium: Basic setup, hyperparameters, Q-Learning, REINFORCE algorithm with Mudoco
+- Gymnasium: Basic setup, hyperparameters, Q-Learning, REINFORCE algorithm with Mudoco \
 *Note: There is more to the training, but at this point, I received the email from Dr. Li regarding what I should focus on, so I pivoted to directly working on the SpecRLBench stuff.*
 
 ## Setting up SpecRLBench
@@ -197,51 +197,51 @@ instead of `./install.bash` because <u>a)</u> the script was `install.sh` and <u
   '.' is not recognized as an internal or external command,
   operable program or batch file.
 ```
-~~TODO: Learn how to make custom environments in gymnasium~~
-Create custom environment
-Lit review of current search-and-rescue operation environment definitions
+- ~~TODO: Learn how to make custom environments in gymnasium~~
+- Create custom environment
+- Lit review of current search-and-rescue operation environment definitions
 
 I then started exploring more into the `safety-gymnasium` and its environments, and found the [Building Button](https://safety-gymnasium.readthedocs.io/en/latest/environments/safe_vision/building_button.html) environment, which seems to be similar to the search-and-rescue operations I am interested in. This env also incorporates vision (optional), which is something I can look into.
 
 # 07-02-26
 
 I started the day out by trying to understand how environments are created. A running list of classes I have found are below:
-`builder.py` - this is the builder of the environments, which is where the world is constructed (inluding obstacles) \
-`__init.py__` - this is where all of the environments are created when you run `pip install -e .` \
-`world.py` - this is the world that includes the observation space
-`\base` - this is where all of the "template" files are included
-- `underlying` - the source of all of the base files
-- `base_task` - the template for creating tasks
-`\ltl` - the directory where all of the LTL-specific tasks are created
-- `ltl_base_task` - built off of `base-task`, it allows the user to encode LTL tasks. Used by other ltl tasks in `\ltl`
-- *Note: These tasks must be imported into the `__init.py__` file in the `\tasks` directory*
-After exploring the repository more, I was able to create my own custom task `multi-goal-level3` and my own gym wrapper `safety_gym_wrapper_ma_sro` and integrate them into the existing codebase.
+`builder.py` - this is the builder of the environments, which is where the world is constructed (inluding obstacles)
+- `__init.py__` - this is where all of the environments are created when you run `pip install -e .` 
+- `world.py` - this is the world that includes the observation space
+- `\base` - this is where all of the "template" files are included
+	- `underlying` - the source of all of the base files
+	- `base_task` - the template for creating tasks
+- `\ltl` - the directory where all of the LTL-specific tasks are created
+	- `ltl_base_task` - built off of `base-task`, it allows the user to encode LTL tasks. Used by other ltl tasks in `\ltl`
+- *Note: These tasks must be imported into the `__init.py__` file in the `\tasks` directory* \
+After exploring the repository more, I was able to create my own custom task `multi-goal-level3` and my own gym wrapper `safety_gym_wrapper_ma_sro` and integrate them into the existing codebase. \
 After that, I moved on to diving deeper into how simulation environments for search and rescue (SAR) environments are currently constructed. Below are all of the papers that I have analyzed so far to learn about how to make a new environment that would satisfy the goals outlined in the presentation provided. 
 ## 07-02-06 Papers
 #### [Unmanned Ground Robots for Rescue Tasks](https://www.intechopen.com/chapters/56080)
 Simulation uses a grid map, but also uses point-cloud mapping to construct a 3D visualization of the environment.
 #### [UAV-UGV Cooperative Trajectory Optimization and Task Allocation for Medical Rescue Tasks in Post-Disaster Environments](https://arxiv.org/pdf/2506.06136)
-Trying to create tasks for multiple agents, with each task being completed individually.
-Using [[Genetic Algorithm]]s, which are better for complex environments. Selects the highest-fitness individuals and mutates them.
-Each agent is assigned one task unique to them
-Minimum safety distance away from vehicle
-Obstacles represented as circles (zones!!!), all vehicles spawn in the same place
+- Trying to create tasks for multiple agents, with each task being completed individually.
+- Using [[Genetic Algorithm]]s, which are better for complex environments. Selects the highest-fitness individuals and mutates them.
+- Each agent is assigned one task unique to them
+- Minimum safety distance away from vehicle
+- Obstacles represented as circles (zones!!!), all vehicles spawn in the same place
 https://github.com/Cherry0302/disaster_uav_ugv_rescue_planner
 #### [Target Search and Navigation in Heterogeneous Robot Systems with Deep Reinforcement Learning](https://arxiv.org/pdf/2308.00331)
 ![Top view of the designed simulation environment for search and rescue in underground mine scenario](Images/mazelike_topdown_env.png) \
 >[!quote]
 >The black lines denote the wall and the sphere-represented victim randomly appears in one of the two branches during the environment generation
 #### [SpecRLBench.. A Benchmark for Generalization in Specification-Guided Reinforcement Learning](https://arxiv.org/pdf/2604.24729v1)
-Benchmark for testing different spectulation-guided RL models (hence [SpecRLBench](SpecRLBench..%20A%20Benchmark%20for%20Generalization%20in%20Specification-Guided%20Reinforcement%20Learning.md) name). Currently, there are 19 environments to choose from, split between **navigation** and **manipulation** tasks. I don't understand how the environments are dynamically created, so I will have to look into that.
+- Benchmark for testing different spectulation-guided RL models (hence [SpecRLBench](SpecRLBench..%20A%20Benchmark%20for%20Generalization%20in%20Specification-Guided%20Reinforcement%20Learning.md) name). Currently, there are 19 environments to choose from, split between **navigation** and **manipulation** tasks. I don't understand how the environments are dynamically created, so I will have to look into that.
 #### [Search Planning of a UAV-UGV Team with Localization Uncertainty in a Subterranean Environment](https://arxiv.org/pdf/2102.06069)
 ![Gazebo simulation environment that reflects a highway tunnel with some obstacles](Images/gazebosim.png) \
 Simulation environment was more realistic (using Gazebo simulator)
 - Included irregular models, but was essentially a cylinder cut in half and hollowed out
 - Sensors included LIDAR and two cameras -- one facing upwards, and one facing forwards. This was done to map out the entire environment since it was a 3D space (by contrast, the [SpecRLBench](SpecRLBench..%20A%20Benchmark%20for%20Generalization%20in%20Specification-Guided%20Reinforcement%20Learning.md) workspace is effectively 2.5D)
 #### [Collaborative Multi-Robot Search and Rescue.. Planning, Coordination, Perception, and Active Vision](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9220149)
-Simulation for SAR environments should be more robust than traditional applications since the environment is often more complex than traditional environments.
-**Sim2Real** methods
-Important to consider noisy data, unbalanced data, and conflicting data as potential issues when abstracting away certain parameters
+- Simulation for SAR environments should be more robust than traditional applications since the environment is often more complex than traditional environments.
+- **Sim2Real** methods
+- Important to consider noisy data, unbalanced data, and conflicting data as potential issues when abstracting away certain parameters
 - May be useful to consider creating some of these disruptions within the simulator to increase its realism
 
 (10/27) Multi-Robot Task Allocation
@@ -249,10 +249,10 @@ Important to consider noisy data, unbalanced data, and conflicting data as poten
 - Market-based approaches and auctions
 - Liu et al. -- Potentially use a supervised system to adapt the robot when new situations occur
 #### [A Heterogeneous Unmanned Ground Vehicle and Blimp Robot Team for Search and Rescue using Data-driven Autonomy and Communication-aware Navigation](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10876050)
-Teams were given points based on how many "artifacts" they found and reported to the correct location (not individuals)
-UAVs and UGVs worked together to a) map out the environment and b) find the aforementioned artifacts (e.g. person, backpack, items, etc.)
-Real-world environments (not super helpful for understanding how simulations should be made)
-UAVs (blimps) were used in mazes and trajectories were mapped out
+- Teams were given points based on how many "artifacts" they found and reported to the correct location (not individuals)
+- UAVs and UGVs worked together to a) map out the environment and b) find the aforementioned artifacts (e.g. person, backpack, items, etc.)
+- Real-world environments (not super helpful for understanding how simulations should be made)
+- UAVs (blimps) were used in mazes and trajectories were mapped out
 
 Once I finished reading those papers, I constructed a mock-up of the environment and task that I hope to complete:
 ###### Mock-Up
@@ -275,16 +275,16 @@ Which, according to AI, boils down to the world being too crowded, resulting in 
 ## Making Walls
 ### Initial Setup
 There were multiple issues I faced while I was trying to make the walls. First, I had to learn how to make a new geom. The existing wall geom was a stub, or simply a template that did not have the necessary parameters to exist in the simulated environment. So, I took the code from the `pillars` geom as a reference for creating the walls, since they share many of the same properties. Initially, here is what I had to change:
-	1. `size`: With the pillars, `size` was just a float value that represented the radius of the `cylinder`. However, for the walls, they were of `type: 'box'`. As such, I had to change this parameter to **`half_sizes`**, which was of type `list` that took in three variables, `[x, y, z]`, that represented how far from the center the wall would extend in 3D. This also meant that the position of the box in the configuration was `'pos': np.r_[xy_pos, half_sizes[-1] + 1e-5]`, where `half_sizes[-1]` was the final (z) element of the list.
-	2. `type`: As mentioned previously, I had to change the type of the obstacle to `box` so that it wasn't a cylinder.
-	3. `name`: The name of the geom was changed to `"walls"` since when the `pos(self)` method is called, it will return `wall_N` where N represents the index of that wall.
+1. `size`: With the pillars, `size` was just a float value that represented the radius of the `cylinder`. However, for the walls, they were of `type: 'box'`. As such, I had to change this parameter to **`half_sizes`**, which was of type `list` that took in three variables, `[x, y, z]`, that represented how far from the center the wall would extend in 3D. This also meant that the position of the box in the configuration was `'pos': np.r_[xy_pos, half_sizes[-1] + 1e-5]`, where `half_sizes[-1]` was the final (z) element of the list.
+2. `type`: As mentioned previously, I had to change the type of the obstacle to `box` so that it wasn't a cylinder.
+3. `name`: The name of the geom was changed to `"walls"` since when the `pos(self)` method is called, it will return `wall_N` where N represents the index of that wall. \
 This allowed me to render the wall for the first time in the simulation, which was quite exciting. They had random positions, which is what I wanted, but they would intersect with the ring that I wanted to leave for the agents.
 ### Ringed Placements
 So, I started working on making the walls spawn in a specified ring. Below were the requirements I set:
 1. The ring's inner/outer radius had to be specifiable, ideally with a +-margin of error
 2. The ring had to have a hollow center, such that agents could be placed within that inner ring
 3. Walls had to be able to be placed randomly along that ring: I didn't want them to spawn in the same place every time
-4. Wall spawning would ideally be controlled by `random_generator.py`. This way, the initial seed would be the sole determinant of the randomness, meaning that the simulation wouldn't change between runs unless the seed was changed
+4. Wall spawning would ideally be controlled by `random_generator.py`. This way, the initial seed would be the sole determinant of the randomness, meaning that the simulation wouldn't change between runs unless the seed was changed \
 I first started with trying to understand how the `placements` attribute worked for geoms, which I found explained [here](https://safety-gymnasium.readthedocs.io/en/latest/components_of_environments/objects.html#general-parameters) in the safety-gym docs. I learned that placements are boxes, constrained by (x,y) coordinates from the origin, that specify a region that the object's origin can be located. Placements can either be a single 4-tuple (i.e. `(x_min, y_min, x_max, y_max)`) or they can be a 1D array of these regions (i.e. a `list`). However, there was an issue since I wanted a ring, I would have to take multiple samples along the ring radius and create boxes from them. Therefore, I had to convert the polar coordinates `(r, θ)` into `(x, y)` using trigonometry, then created a box with dimensions `2 * margin` around that central point. I used `WALL_COUNT` samples so that the walls would be approximately spaced around the ring, and forced the margin to be larger than the `keepout` (if no margin specified). That created an environment that looked like this:
 ![Top-down View of the SARE with randomly placed walls around a ring](Images/ringed_placements_topdown_env.png) 
 ### Random Sizing
@@ -305,7 +305,7 @@ After incorporating [ringed placements](#ringed-placements) when creating the wa
 I was able to take the `Zones(Geom)` class and refactored it for it to become a building. The changes I made are listed below:
 1. Changed the `type` to `"box"` instead of `"cylinder"`
 2.  Added `placements`, `keepout`, and `alpha` parameters to incorporated `border_placements()` and visual changes
-3. Slimmed down the colors to <span style="color:light_grey"><code>light_gray</code></span> (to distinguish from `gray` walls), <span style="color:red">red</span>, <span style="color:yellow"><code>yellow</code></span>, and <span style="color:lime"><code>green</code></span>, the latter three of which I hope to incorporate into my costs as more risky candidates.
+3. Slimmed down the colors to <span style="color:light_grey"><code>light_gray</code></span> (to distinguish from `gray` walls), <span style="color:red">red</span>, <span style="color:yellow"><code>yellow</code></span>, and <span style="color:lime"><code>green</code></span>, the latter three of which I hope to incorporate into my costs as more risky candidates. \
 Tomorrow, I plan on making the casualties extended from the zones using `type:'capsule'`, which I think will be fun as well as informative. I plan on making some of them spawn in buildings and the rest spawn in the open. I think that casualties in buildings will have higher rewards than those outside (since in real life, they are likely in worse condition due to debris, collapsed supports, etc.). EOD, here is what the environment looks like:
 ![View of the environment as of July 3rd, with agents, walls, and buildings](Images/buildings_one_point_perspective.png)
 # 07-04-26
@@ -319,7 +319,7 @@ if self.observe_vision:
 		name = f'vision_{i}'
 		obs[name] = self._obs_vision(camera_name=name)
 ```
-\ This way, the vision camera creation was agent-number-agnostic. This code was already somewhat implemented between the lidar sensors and the manual setting from the one-agent system, so I was able to extrapolate into this condition.
+This way, the vision camera creation was agent-number-agnostic. This code was already somewhat implemented between the lidar sensors and the manual setting from the one-agent system, so I was able to extrapolate into this condition. \
 After that, the vision worked! In the `obs` keys, `vision_0,1,...` is registered, and with the proper formatting (since I used `_obs_vision()`, I didn't have to configure that). However, since the camera renders with the same methods as the rendering for casualties, I made this little helper statement:
 ```python
 render_mode = "casualty" if 'Vision' not in env_name else None
@@ -338,16 +338,16 @@ But today, I wanted to get more into the granularities of what that meant. So, h
 2. There should be two types of casualties; one that is outside and spawns in randomly throughout the map, and one that specifically spawns in buildings.
 	1. These casualty types should also be distinguishable through some way so that when making the rewards, I can specify which one has higher reward
 3. The total of these casualties should add up to the number of agents (for now). Since LTL is not yet implemented for this environment, the agent can't really do multiple tasks sequentially
-4. Building casualties should spawn inside buildings (obviously)
+4. Building casualties should spawn inside buildings (obviously) \
 *Note: If looking at the code, I created the class called `Casualtys` since it would turn into `var_casualty` during the actual environment building. I know that's not how you spell it, but it made the workflow more modular.*
 ### Surface
 Once again, I was able to reuse the `Zones` geom class for the surface casualties, simply chaging the type to the capsule and adjusting some of the color options to be more in line with what I wanted. Like the buildings, I made them opaque, gave them the ability to have custom `locations` and `placements`, and adjusted the `size` parameters accordingly.
 ### Entrapped
-Now, making the entrapped casualties was more challenging than the surface ones, since I had to make them sync up with the building locations (which were at-time being set randomly by the [border placements](#border-placements)). The first thing I tried to do was retrieve the `pos` of the buildings. First, I head to retrieve the attributes of the Building class using `dir(self._geoms.get('light_gray_buildings')`. From there, I found out the `pos()` method, (I could've also checked the `buildings.py` class and seen it there), and was able to call it using `self._geoms.get('light_gray_buildings').pos()`, which returned a list of triples. However, I was calling this in the `specific_reset()` method since those positions weren't yet initialized in the `_build()` method. This meant that I could not modify the positions of the entrapped casualties within that reset method.
-From there, I pivoted to what I had done for the `Walls`, since those required randomized sizes that were cached at the initial startup build. I realized that I could use a similar idea to what I did there, but instead of making the sizes, I would be making `locations`. Using the `border_placements()` code as a foundation, I made a wrapper method called `border_locations()` that took in the border parameters as well as the `num` of buildings being spawned in, the `RandomGenerator` object of the task, and `keepout` for the `draw_placements()` method I recycled from the `RandomGenerator` class. The method returns "a list of (x, y) locations from the `random_generator` that can be used when updating locations in the `_build()` method of a task."
+Now, making the entrapped casualties was more challenging than the surface ones, since I had to make them sync up with the building locations (which were at-time being set randomly by the [border placements](#border-placements)). The first thing I tried to do was retrieve the `pos` of the buildings. First, I head to retrieve the attributes of the Building class using `dir(self._geoms.get('light_gray_buildings')`. From there, I found out the `pos()` method, (I could've also checked the `buildings.py` class and seen it there), and was able to call it using `self._geoms.get('light_gray_buildings').pos()`, which returned a list of triples. However, I was calling this in the `specific_reset()` method since those positions weren't yet initialized in the `_build()` method. This meant that I could not modify the positions of the entrapped casualties within that reset method. \
+From there, I pivoted to what I had done for the `Walls`, since those required randomized sizes that were cached at the initial startup build. I realized that I could use a similar idea to what I did there, but instead of making the sizes, I would be making `locations`. Using the `border_placements()` code as a foundation, I made a wrapper method called `border_locations()` that took in the border parameters as well as the `num` of buildings being spawned in, the `RandomGenerator` object of the task, and `keepout` for the `draw_placements()` method I recycled from the `RandomGenerator` class. The method returns "a list of (x, y) locations from the `random_generator` that can be used when updating locations in the `_build()` method of a task." \
 When I first tested it out, though, the simulation would not load. At the time, I assumed it had to be because of the locations generating inside one of the other objects, and I was right! After creating a [Desmos graph](https://www.desmos.com/calculator/bcqjpzneh6) to help me visualize the parameters I had set, I saw that there was some overlap between the placements of the Walls and Buildings. After tweaking the parameters and checking the simulation multiple times, I ended up with the params you can see in the graph. The sim now loads in ~5 seconds, which is pretty good considering all of the walls, casualties, and buildings it has to loads, and there isn't interference between the objects.
 #### Additional Initial Setup
-Since there were more geoms I was editing in the `_build()` method, I created a `_replace_geom()` method that allowed me to replace geometries more easily in the multi-agent environment. I also made it so that there were fewer entrapped casualties than surface casualties (but still had them add up to `num_agents`) [TODO: Find more research determining this ratio and incorporate it into the environment]. I also changed the colors of the buildings to be more building-like and help distinguish them from the walls. I also added a `debug` attribute to the `Buildings` class so that I could make them translucent when I want to see if the entrapped casualties have been spawned correctly but also make them easy to turn solid (e.g. when using vision). Current progress: ![](Images/humans_onepoint_view.png)
+Since there were more geoms I was editing in the `_build()` method, I created a `_replace_geom()` method that allowed me to replace geometries more easily in the multi-agent environment. I also made it so that there were fewer entrapped casualties than surface casualties (but still had them add up to `num_agents`) [TODO: Find more research determining this ratio and incorporate it into the environment]. I also changed the colors of the buildings to be more building-like and help distinguish them from the walls. I also added a `debug` attribute to the `Buildings` class so that I could make them translucent when I want to see if the entrapped casualties have been spawned correctly but also make them easy to turn solid (e.g. when using vision). Current progress: ![](Images/casualties_onepoint_view.png)
 \
 Next, I want to show this to Zijian to get approval to continue making the policy wrapper, which will definitely be interesting.
 
