@@ -34,6 +34,8 @@
 		- [Initial Thoughts](#initial-thoughts)
 		- [Surface](#surface)
 		- [Entrapped](#entrapped)
+- [07-05-26](#07-05-26)
+		- [Custom Environment Name Creation/Changes](#custom-environment-name-creationchanges)
 
 # Sources
 [ROS Ubuntu Installation](https://wiki.ros.org/noetic/Installation/Ubuntu) \
@@ -48,6 +50,7 @@
 [MuJoCo Creating Models](https://mujoco.readthedocs.io/en/latest/XMLreference.html)
 [akhaled247/SpecRLBench](https://github.com/akhaled247/SpecRLBench)
 [BURISE-26 Project Repository](https://github.com/akhaled247/BURISE-26)
+[SARE Spawning Zone Desmos Calculator](https://www.desmos.com/calculator/bcqjpzneh6)
 # Papers
 | URL                                                              |
 | ---------------------------------------------------------------- |
@@ -350,6 +353,25 @@ When I first tested it out, though, the simulation would not load. At the time, 
 Since there were more geoms I was editing in the `_build()` method, I created a `_replace_geom()` method that allowed me to replace geometries more easily in the multi-agent environment. I also made it so that there were fewer entrapped casualties than surface casualties (but still had them add up to `num_agents`) [TODO: Find more research determining this ratio and incorporate it into the environment]. I also changed the colors of the buildings to be more building-like and help distinguish them from the walls. I also added a `debug` attribute to the `Buildings` class so that I could make them translucent when I want to see if the entrapped casualties have been spawned correctly but also make them easy to turn solid (e.g. when using vision). Current progress: ![](Images/casualties_onepoint_view.png)
 \
 Next, I want to show this to Zijian to get approval to continue making the policy wrapper, which will definitely be interesting.
+# 07-05-26
+### Custom Environment Name Creation/Changes
+Today, I wanted to get rid of the "level" part of the task name since it didn't really make sense in this context (at least for now, might change later). In order to do that, I had to follow these steps:
+1. Change the name of your file to whatever you like. I tried to keep convention by naming it `multi_goal_sar.py`, but I don't think it really matters. Also, name the class something you will remember. That also doesn't matter for adding a custom naming type, but I made it `MultiGoalSAR`, again to keep convention.
+2. Go to `SpecRLBench\specbench\envs\zones\safety-gymnasium\safety_gymnasium\tasks\__init__.py` and add your file and class to the import statements, e.g. `from safety_gymnasium.tasks.safe_multi_agent.tasks.multi_goal.multi_goal_sar import MultiGoalSAR`. That way, when you run `pip install -e specbench/envs/zones/safety-gymnasium`, that class will be registered and recognized by the program.
+3. In `SpecRLBench\specbench\envs\zones\safety-gymnasium\safety_gymnasium\utils\task_utils.py`, add a section that looks like this, but with whatever you want to name your environment. Since this is specific to SpecRLBench, I don't know how to change it in base safety-gymnasium, but I assume it would be similar to this:
+ ```python
+if '<ENV_ID>' in task_id:
+        return "<ClassName>"
+    elif 'LTL' in task_id: #elif if important; not there normally.
+	    # ...
+"""My Specific Example"""
+if 'LTLMASAR' in task_id:
+        return "MultiGoalSAR"
+    elif 'LTL' in task_id: #elif if important; not there normally.
+	    # ...
+ ```
+4. In `SpecRLBench\specbench\envs\zones\safety-gymnasium\safety_gymnasium\__init__.py` (different `init` file, pay attention!) Add your environment. For me, since it was a multi-goal environment, I put it in that group and named it `LTLMASAR5` since I want to incorporate LTL and there are 5 agents currently in the sim. For me, I also had to specify `{'agent_num': 5}`, but if you're working with single agent envs I don't think that applies. \
+Now I have a much more descriptive class and environment name than `LTL3MA5`, which was honestly mislead as well (it isn't a level 3 env, it's completely different and doesn't build off of anything).
 
 --- 
 #project/idea 
