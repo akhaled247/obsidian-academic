@@ -18,6 +18,7 @@
 	- [Setting up SpecRLBench](#setting-up-specrlbench)
 - [07-02-26](#07-02-26)
 	- [07-02-06 Papers](#07-02-06-papers)
+		- [Mock-Up](#mock-up)
 		- [GitHub Repositories](#github-repositories)
 - [07-03-26](#07-03-26)
 	- [Making Walls](#making-walls)
@@ -36,6 +37,18 @@
 		- [Entrapped](#entrapped)
 - [07-05-26](#07-05-26)
 		- [Custom Environment Name Creation/Changes](#custom-environment-name-creationchanges)
+- [07-06-26](#07-06-26)
+	- [Meeting with Zijian](#meeting-with-zijian)
+	- [Agent Spawn Parameters](#agent-spawn-parameters)
+	- [Pseudo Lidar Reversion](#pseudo-lidar-reversion)
+	- [Building Walls](#building-walls)
+		- [Manual Configurations](#manual-configurations)
+		- [Automatic Configurations](#automatic-configurations)
+	- [Miscellaneous Tweaks](#miscellaneous-tweaks)
+		- [Naming Tweaks](#naming-tweaks)
+		- [Better Building Spawning](#better-building-spawning)
+		- [Color Additions](#color-additions)
+		- [EOD Pictures](#eod-pictures)
 
 # Sources
 [ROS Ubuntu Installation](https://wiki.ros.org/noetic/Installation/Ubuntu) \
@@ -258,7 +271,7 @@ Simulation environment was more realistic (using Gazebo simulator)
 - UAVs (blimps) were used in mazes and trajectories were mapped out
 
 Once I finished reading those papers, I constructed a mock-up of the environment and task that I hope to complete:
-###### Mock-Up
+### Mock-Up
 ![MockUp of Robust MAS SAR Environment](Images/sare_initial_mockup_and_notes.png) \
 The obstacles, victims, buildings, and casualties will all be randomized (easier than static placements), and the agents will always spawn near the center. This way, there is a good balance between randomness (which is required to prevent an overfitted policy) and structure (since otherwise, the simulation would not be realistic).
 ### GitHub Repositories
@@ -372,6 +385,95 @@ if 'LTLMASAR' in task_id:
  ```
 4. In `SpecRLBench\specbench\envs\zones\safety-gymnasium\safety_gymnasium\__init__.py` (different `init` file, pay attention!) Add your environment. For me, since it was a multi-goal environment, I put it in that group and named it `LTLMASAR5` since I want to incorporate LTL and there are 5 agents currently in the sim. For me, I also had to specify `{'agent_num': 5}`, but if you're working with single agent envs I don't think that applies. \
 Now I have a much more descriptive class and environment name than `LTL3MA5`, which was honestly mislead as well (it isn't a level 3 env, it's completely different and doesn't build off of anything).
+##### P.S.
+I've added the following code into `SpecRLBench\specbench\envs\zones\safety-gymnasium\safety_gymnasium\utils\registration.py`. If you ever have issues with this process or get an error like `Environment {id} is not registered in safety-gymnasium`, then you can look into this and see if you're environment has been registered. For me, I kept it broader since I had actually flipped the way the registration worked, so instead of `LTLMASAR` I had written `LTLSARMA`, which threw an error. Just so that you're aware!
+```python
+safe_registry_custom = []
+        for env in safe_registry:
+            if "MA" in env:
+                safe_registry_custom.append(env)
+        print(safe_registry_custom)
+```
+# 07-06-26
+## Meeting with Zijian
+- ~~*Agent spawning inner radius*~~
+- ~~Change building spawning to have walls around them (extend `LTLWall`)~~
+~~- *Lidar observed = false for entrapped casualties, revert to `pseudo` lidar*~~
+- Policy - Use existing libraries (stable baselines; PPO) - start with simple tasks (e.g. go to a location), then expand to more complicated tasks
+	- For policy training use lambda machine
+- [LATER] Different env with human collaborators 
+## Agent Spawn Parameters
+The first thing that I worked on was the agent spawning within the inner radius, which I had briefly started before coming to the lab. At first, I tried to do what I had done previously with the buildings and walls, which is replace the existing instance of them from within the `_build()` function. However, that didn't work because the agents are actually built in a separate `_build_agent()` function that runs as part of the init method of the `underlying` class. \
+So, I had to modify the existing class to add two new parameters (`placements` and `keepout`), which I was able to then use in my task init function like so: `self._build_agent(self.agent_name, keepout=0.2, placements=[(-0.67, -0.67, 0.67, 0.67)])`. \
+However, even then, I was getting issues where the simulation would stall for no apparent reason. It was then that I discovered that the `gremlin` class that was being used to repreesnt the other agents had a bug in it. After digging through the code, I found that the `self.agent.get_agent_pos(i)` method it was using would always return `[0., 0., 0.1]`; meaning that these gremlins were all spawning at the center and not moving to the actual agent pos. This was causing issues because since the gremlins wouldn't move and they were very close to the agents, there wasn't space for both to coexist. So, I had to use the world engine (via `self.engine`) and find the agent's pose data from there, since that class is updated every step, not just at initialization (i.e. `agent_xy = self.engine.data.body(f'agent_{i}').xpos[:2]`.   \
+You may notice that instead of the `ring_placements()` method, I just have a box with the bounding values in it. I found that since I've already created a [graphing helper](https://www.desmos.com/calculator/bcqjpzneh6), I could just plug numbers into there until I found the box size that maximized the space. This way, I wouldn't have to worry about complicated geometry and in the end, it would likely not provide much benefit.
+## Pseudo Lidar Reversion 
+Making the entrapped casualties not visible to the lidar was quite simple: all I had to do was change `self.is_lidar_observed` to be conditional on `category != list(self.CATEGORIES)[-1]`, since the last index of these categories should always be the value that is for the `entrapped` casualties. When I print `obs[a]` every step, the keys I see for lidar are: `buildings, surface_casualtys, walls, gremlins`: no `entrapped_casualtys`, meaning that this one-line change was the fix.
+## Building Walls
+### Manual Configurations
+Once I had the agents working as intended, I wanted to make walls enclose around the building propositions so that if an agent enters a building, they can still see the entrapped casualty with lidar or vision. \
+The first action I took was to add additional parameters to the existing`ltl_walls` class, since that was most similar to what I wanted to do: four walls spawning around a central point. 
+1.  `locations`: I knew that I was going to have to use it to put the walls exactly where the buildings were.
+2.  `x_offset`, `y_offset`, `theta`: So that I could move and rotate the wall wherever I wanted.
+3. `height`: Since the building walls were going to have to be taller than the existing border walls. \
+Once that was done, I tried actually using these inputs to rotate and translate the walls to a configuration I manually inputted.
+4. I had to use a rotation matrix to rotate the locations after using the offsets to initially offset them, which made the final locations out to be
+```python
+(x - self.d_x) * cos_t - (y - self.d_y) * sin_t + self.d_x
+(x - self.d_x) * sin_t + (y - self.d_y) * cos_t + self.d_y
+```
+5. I also had to manually calculate the rotations for each walls using `np.arctan2(y - self.y_offset, x - self.x_offset for x, y in self.locations`, since random rotations wouldn't work
+### Automatic Configurations
+#### Translation
+Once I successfully changed those, I was ready to move on to integrating them with the existing building code. The first way I tried to make that work was to make a custom method, shown below:
+```python
+def _add_n_geoms(self, n: int, geom: Geom, base_name: str, *kwargs):
+	for i in range(n)
+		self._add_n_geoms(geom(kwargs, name=f"building_ltl_walls_{i}"))
+```
+This did not work. According to AI, it has to do with me trying to call the `geom` parameter even though that isn't how Python classes work, and the `kwargs` shouldn't be utilized in that way. Because of this, I went to a simpler for loop within the init function:
+```python
+for i in range(self.agent_num):
+            self._add_geoms(LtlWalls(name=f"building{i}_ltl_walls"))
+```
+You'll notice that the {i} is not at the end of the name, as you may expect (and as I did, too). Initially, I had it as `f"building_ltl_walls_{i}"`, which I found out later did not work. \
+ For now, though, I used the same for loop to initialize the building walls with the locations from `self._cached_building_locations[i]` so that each instance wouldn't try to sample an incorrect location and "double up" on a single building. \ 
+ However, when I ran the code, all of the walls were spawning in the same place. I was incredibly confused for a long time, but then I realized that since I was spawning multiple instances of the wall, it was cutting off the last character--the {i}. So, when it would get the location from the config for that instance, it would actually just get the location of the *first* instance created. Once I fixed that, though it was working as expected. \
+ *Note: I changed the offset variables to d_y and d_x so that it's more concise in the code; they stand for delta_y/x respectively*
+#### Rotation
+ Once I figured out the bugs with the translation portion, I could move on to the rotation part. After digging around in the `random_generator` class (since that was where the `draw_placements()` method was found), I found the `random_generator.generate_rots(n)` method, which was exactly what I was looking for. I made another variable called `_cached_building_rots`, passed in the function with `n=self.agent_num`, and passed that into the Buildings geom that I was already creating in `_build()`. I could then use this same variable and pass it into the building walls, but it didn't work out of the box. \ 
+ That's because the rotation matrix took in one angle `theta`, not a list of them. So, I created a `h_index` (for high index) that parses the name given by the user for a number and uses that as the index for searching through the `rots`, which worked quite well. Once theta was calculated, the rest of the code was already tested, which meant that I had set up the environment how I wanted to! 
+## Miscellaneous Tweaks
+There were more misc. tweaks than previously, so I decided to clump them together here.
+### Naming Tweaks
+I had an unusual number of tweaks I made to names of parameters, keys, and classes, so here they are:
+- **Policy**: Changed the policy class name from `SafetyGymWrapperMASRO` to `SafetyGymWrapperMASAR` to match established naming convention
+- **Building Cost**: Fixed a bug that made the name of building costs the RGBA array for the color; changed to `self.color_name`  as it should be
+- **`sar_utils` Methods**: Renamed the `thickness` parameter on border-related methods to `margin` for parity with ring-related methods
+- `WALL_MARGIN`: Renamed the `MARGIN` parameter in the task to `WALL_MARGIN` so that it was more descriptive.
+### Better Building Spawning
+With the way the simulation was currently set up (i.e. the seed), there were two buildings that were spawning inside one another (see pictures above). However, there was plenty of space at the bottom of the sim for a building to go; it wasn't being used, though, since the placements are randomly sampled and that sampling had led multiple buildings to spawn in the same quadrant, causing the clumping seen. To make them more spread out, I manually forced each iteration to move into the subsequent quadrant using this method:
+```python
+def draw_border_placement_from_loop(
+        side_length: float, 
+        margin: float, 
+        keepout: float,
+        i: int, 
+        random_generator: RandomGenerator):
+        
+    return random_generator.draw_placement(
+            placements=[border_placements(side_length, margin)[i%4]], 
+            keepout=keepout
+            )
+```
+### Color Additions
+Added <span style="color:#e27d5b">terracotta</span> to the list of colors for use in the building walls.
+### EOD Pictures
+I wanted to include two pictures this time: one of the top-down view of the sim, and one of the FPV of an agent in the sim. That way, it's easier to see the difference, since from afar, it looks pretty similar. In these pics, you can see both of the entrapped humans (from up here red specks), making the UX a lot better too.
+![](Images/enclosure_topdown_fpv_views.png)
+![](Images/env_rev1_iso_view.png)
+
+
 
 --- 
 #project/idea 
