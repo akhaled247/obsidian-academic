@@ -73,6 +73,5 @@ Created:
 * Merit and need-based financial aid to undergrads
 * Apply to CSS Profile and FAFSA when you apply to BU
 * Merit-based scholarships -- must submit before **December 1st**, but does not force ED applications
-* 
 --- 
 #project/idea

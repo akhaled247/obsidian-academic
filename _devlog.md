@@ -7,6 +7,8 @@
 # Table of Contents
 - [Sources](#sources)
 - [Papers](#papers)
+- [Task Levels](#task-levels)
+- [TODO](#todo)
 - [06-29-26](#06-29-26)
 	- [Old Command](#old-command)
 	- [New Command](#new-command)
@@ -38,7 +40,6 @@
 - [07-05-26](#07-05-26)
 		- [Custom Environment Name Creation/Changes](#custom-environment-name-creationchanges)
 - [07-06-26](#07-06-26)
-	- [Meeting with Zijian](#meeting-with-zijian)
 	- [Agent Spawn Parameters](#agent-spawn-parameters)
 	- [Pseudo Lidar Reversion](#pseudo-lidar-reversion)
 	- [Building Walls](#building-walls)
@@ -49,21 +50,44 @@
 		- [Better Building Spawning](#better-building-spawning)
 		- [Color Additions](#color-additions)
 		- [EOD Pictures](#eod-pictures)
-
+- [07-07-26](#07-07-26)
+	- [Keyboard Movement](#keyboard-movement)
+	- [Rewards and Punishments](#rewards-and-punishments)
+	- [Distance-and-Geom Natural Lidar Detection](#distance-and-geom-natural-lidar-detection)
+		- [The Issue](#the-issue)
+		- [Idea A - Natural Lidar Identified](#idea-a---natural-lidar-identified)
+		- [Idea B - Pseudo Lidar Occluded](#idea-b---pseudo-lidar-occluded)
+		- [Debugging Idea B](#debugging-idea-b)
+	- [Miscellaneous Tweaks](#miscellaneous-tweaks)
 # Sources
+## ROS
 [ROS Ubuntu Installation](https://wiki.ros.org/noetic/Installation/Ubuntu) \
 [Information Slideshow](https://docs.google.com/presentation/d/1C7Mwcdt3m7QfknjxOcZXIfugGhLVEKumrAQWOlkqRtM/edit?pli=1&slide=id.p#slide=id.p) \
 [tf tutorials](https://wiki.ros.org/tf/Tutorials) \
 [geometry msgs wiki](https://docs.ros.org/en/noetic/api/geometry_msgs/html/index-msg.html) \
 [pubsub with python](https://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber(python)) \
 [frames](/_pages/rise/frames.pdf) \
+## SpecRLBench
+### Repositories
 [SpecRLBench](https://github.com/BU-DEPEND-Lab/SpecRLBench) \
 [RISE Python Training](https://github.com/akhaled247/rise_python_training/tree/main) \
-[Gymnasium Documentation](https://gymnasium.farama.org/tutorials)
-[MuJoCo Creating Models](https://mujoco.readthedocs.io/en/latest/XMLreference.html)
-[akhaled247/SpecRLBench](https://github.com/akhaled247/SpecRLBench)
-[BURISE-26 Project Repository](https://github.com/akhaled247/BURISE-26)
-[SARE Spawning Zone Desmos Calculator](https://www.desmos.com/calculator/bcqjpzneh6)
+[akhaled247/SpecRLBench](https://github.com/akhaled247/SpecRLBench) \
+[BURISE-26 Project Repository](https://github.com/BU-DEPEND-Lab/RISE-2026) \
+[SB3 GitHub Repo](https://github.com/DLR-RM/stable-baselines3/tree/master) \
+[MARLlib (IPPO Impl)](https://github.com/Replicable-MARL/MARLlib/blob/master/marllib/marl/algos/scripts/ippo.py)
+[SAR MARL](https://github.com/elte-collective-intelligence/student-search#abstract)
+
+### Documentation
+[Gymnasium Documentation](https://gymnasium.farama.org/tutorials) \
+[MuJoCo Creating Models](https://mujoco.readthedocs.io/en/latest/XMLreference.html) \
+[RL Baselines3 Zoo](https://stable-baselines3.readthedocs.io/en/master/guide/rl_zoo.html) \
+[SB3 PPO](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html) \
+[MARLlib (PPO Family)](https://marllib.readthedocs.io/en/latest/algorithm/ppo_family.html#proximal-policy-optimization-a-recap)
+### Miscellaneous
+[SARE Spawning Zone Desmos Calculator](https://www.desmos.com/calculator/bcqjpzneh6) \
+[TensorBoard (localhost)](http://localhost:6006/?pinnedCards=[{%22plugin%22%3A%22scalars%22%2C%22tag%22%3A%22train%2Fexplained_variance%22}%2C{%22plugin%22%3A%22scalars%22%2C%22tag%22%3A%22train%2Floss%22}%2C{%22plugin%22%3A%22scalars%22%2C%22tag%22%3A%22train%2Fvalue_loss%22}%2C{%22plugin%22%3A%22scalars%22%2C%22tag%22%3A%22train%2Fstd%22}]&darkMode=true#timeseries&runSelectionState=eyJQUE9fMSI6ZmFsc2UsIlBQT18yIjpmYWxzZSwiUFBPXzMiOnRydWUsIlBQT180IjpmYWxzZSwiUFBPXzUiOnRydWV9) \
+[Practical Tips For Reliable RL](https://araffin.github.io/slides/tips-reliable-rl/) \
+
 # Papers
 | URL                                                              |
 | ---------------------------------------------------------------- |
@@ -74,6 +98,27 @@
 | https://arxiv.org/pdf/2102.06069                                 |
 | https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9220149 |
 | https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10876050    |
+# Task Levels
+- Level 0:
+- Level 1: Rescue portion of search & rescue
+	- Gremlin pos teleportation code, once found and interacted with then pick up and take to spawning circle (zone?).
+- Level 2: Human collaborators
+	- Moving target geom, build on that probably
+# TODO
+> Based on meetings with Zijian and mentor-mentee agreement goals
+- ~~*Agent spawning inner radius*~~
+- ~~Change building spawning to have walls around them (extend `LTLWall`)~~
+~~- *Lidar observed = false for entrapped casualties, revert to `pseudo` lidar*~~
+~~- [identify] rewards/punishments~~
+~~- Test manually (i.e. keyboard)~~
+~~- take each lidar observation for each lidar_observable , find the smallest number, and set the other lidar_observable numbers for that ray to 0~~
+- Policy - Use existing libraries (stable baselines; PPO) - start with simple tasks (e.g. go to a location), then expand to more complicated tasks
+	- StableBaselines (install conda, then have folder with SpecRLBench 
+	- For policy training use lambda machine
+- LLM where we specify agent and casualties and explain what to avoid etc. and have LLM generate high level plan, call low level controller (a*, something else)
+~~- Migrate `BURISE-2026` personal repo to `BU-DEPEND-Lab`~~
+~~- Debug new level system~~
+~~- Format `action`, `obs`, `info` space so that it works with PPO vis  ~~
 # 06-29-26
 We attempted to set up ROS Noetic on Ubuntu 20.04 within a docker container within a remote desktop. Initially, this is the command we chose:
 ## Old Command
@@ -203,6 +248,8 @@ As part of this training, I have learned
 Unlike in the tutorial, I didn't have to run `cd specbench` since the install file was in the main folder  
 I also had to run these commands:
 ```bash
+conda create -n specbench python=3.10
+conda activate specbench
 pip install -e .
 pip install -e specbench/envs/panda-gym
 pip install -e specbench/envs/zones/safety-gymnasium
@@ -395,13 +442,6 @@ safe_registry_custom = []
         print(safe_registry_custom)
 ```
 # 07-06-26
-## Meeting with Zijian
-- ~~*Agent spawning inner radius*~~
-- ~~Change building spawning to have walls around them (extend `LTLWall`)~~
-~~- *Lidar observed = false for entrapped casualties, revert to `pseudo` lidar*~~
-- Policy - Use existing libraries (stable baselines; PPO) - start with simple tasks (e.g. go to a location), then expand to more complicated tasks
-	- For policy training use lambda machine
-- [LATER] Different env with human collaborators 
 ## Agent Spawn Parameters
 The first thing that I worked on was the agent spawning within the inner radius, which I had briefly started before coming to the lab. At first, I tried to do what I had done previously with the buildings and walls, which is replace the existing instance of them from within the `_build()` function. However, that didn't work because the agents are actually built in a separate `_build_agent()` function that runs as part of the init method of the `underlying` class. \
 So, I had to modify the existing class to add two new parameters (`placements` and `keepout`), which I was able to then use in my task init function like so: `self._build_agent(self.agent_name, keepout=0.2, placements=[(-0.67, -0.67, 0.67, 0.67)])`. \
@@ -472,8 +512,259 @@ Added <span style="color:#e27d5b">terracotta</span> to the list of colors for us
 I wanted to include two pictures this time: one of the top-down view of the sim, and one of the FPV of an agent in the sim. That way, it's easier to see the difference, since from afar, it looks pretty similar. In these pics, you can see both of the entrapped humans (from up here red specks), making the UX a lot better too.
 ![](Images/enclosure_topdown_fpv_views.png)
 ![](Images/env_rev1_iso_view.png)
+# 07-07-26
+## Keyboard Movement
+First, I wanted to be able to test the environment that I was working on. So, after looking through the documentation for a little bit, I found that there are Debug environments that allow for manual control. I just had to translate it to multi-agent systems. \
+The first step was to make the Debug environments fit the naming convention of the rest of the codebase. To do so, in the `__init.py__` where all the environments are initialized, I got rid of the `{PREFIX}` that was prepended onto the environment. I had to do the same for the vision environments, so it was a small bug to squash \
+The next step was to make the point actually move with the press of the keys. At first, I didn't know how that would even work. After looking at the code, I saw that the Point class has a `debug()` method baked into the code, where it takes an action and encodes it into an array that would be passed into `apply_action(action)`. When I tried this code, though, it was returning \
+`ValueError: operands could not be broadcast together with shapes (4,) (10,) (10,)` \
+This was because the action space is 5 agents x 2 inputs (forward/backward movement and turning), so there should be 10 inputs given. However, the existing code was meant for a 1 agent x 4 inputs (which doesn't really make sense, since it should only take in 2). \
+To fix this, I initially thought to change the `apply_action` method. Since I did not know what the ValueError was confused about, I tried to return five copies of the original action space but with two inputs instead of 4, but that also didn't work. Next, I tried flattening the `clip` function, but that made a list of `(20, )` which also didn't line up with what the actual action space was. After that, I edited the action submission so that I would submit an array of shape `(agent_num*2, )` (*Note: added afterward so `agent_num` is driving the length i.e. not static)*. When the keys were pressed, it would submit to positions 0 and 1 of this list. When I tested this, though, it would move the first two agents forward and backwards (without rotating). It seems as though the action space is formatted such that `[all_translations, all_rotations]` instead of `[translation_0, rotation_0, trans_1, rot_1, ..., trans_N, rot_N` like I expected. Once I learned that, I instead submitted the rotation to position `agent_num`, and I was able to control the agent!
+![](Images/agent_manual_keyboard_ctrl.gif)
+## Rewards and Punishments
+The next item on the task list that I wanted to get done was identifying the rewards and punishments in the `safet_gym_wrapper_ma_sro.py`. The existing code was only looking at the `zones` geom as the main driver of cost. However, since I wanted to make it more generalizable, I filter the `agent_info` for any entries with a value greater than 0 that is not `"cost_sum"`. That way, I only have active propositions, its generalizable for any geom with a cost, and I discard the rest of the data. \
+As of today, these are the costs that impact the reward of the agent:
+1. `cost_buildings_terracotta_`: Initially, I had set this to decrement the reward by 0.05, but after talking with Zijian, he recommended me to change it to positive 0.05 to encourage exploration over exploitation.
+2. `cost_casualtys_surface_`: I set this to 0.5 since I wanted a substantial but not incredible reward
+3. `cost_casualtys_entrapped_`: I set this to 1.0 so that agents would be encouraged to explore more and search for entrapped casualties.
+4. `cost_collision`: I set this to -1.0 since in a realistic environment, agents should not run into each other. If they do, then parts will likely break, which would be very costly for already budget-constrained organizations.
+Now, the reward for the agent changes based on the environment. I chose not to include the wall collisions as part of the rewards and punishments since they don't actually do "harm" per se to the agent; the policy should learn how to navigate around the walls to maximize rewards. However, I may decrement reward if the agent exploits the "bouncing" characteristic of the wall to move faster.
+## Distance-and-Geom Natural Lidar Detection
+### The Issue
+With pseudo lidar, as long as the object is within range, the lidar will pick it up. This is because objects are treated as points based on their position, and if the lidar 'ray' hits the object (or, with aliasing on, it doesn't even need to hit it, just be near it), it'll return a value. This is useful because you have to discretize what would normally be a continuous input into `num_bins`, but it also means that the agent is 'omniscient' and can see through walls (not ideal). \
+On the other hand, natural lidar only returns the value of the closest geom by casting `num_bins` rays in a circle around the agent. This causes two main issues. First, these values populate all lidar observations equally, so the agent doesn't actually know what it's sensing. Second, the natural lidar does not have aliasing, so if the ray misses the object, it'll return a value of 0.
+### Idea A - Natural Lidar Identified
+I thought I could work backwards from the natural lidar type to implement pseudo lidar. First, the ray would report if it contacted an object that was `lidar_observable`. If it did, then another method would recursively search through all of the geoms in the scene and determine what object it hit. Based on that, it would determine what obstacle was hit by the array and add the lidar distance to that obstacle's lidar observation space. \
+This solved the problem that pseudo lidar had where it would see through walls, but it inherited the problem with natural lidar that if the ray hit nothing, it would report nothing, and information would be lost.
+### Idea B - Pseudo Lidar Occluded
+Knowing this, I tried doing the inverse: starting with a foundation of pseudo lidar and discarding the values that were occluded by other obstacles using natural lidar. This also works with aliasing, avoiding the inherent problem with natural lidar entirely. It also is more accurate, since the ray is being sent directly to the object instead of around it.
+### Debugging Idea B
+Though this idea was definitely closer to what I wanted, I still faced some issues.
+1. The buildings were not being detected by the lidar. When debugging, I found that if I changed the alpha value to !=0.0, then it would work. Once I figured this out, I realized that it was because the ray being sent by the lidar would pass through the building.
+2. This, however, made it so that when the agent entered the building, it would lose all of its observation data. To combat this, I detected whether the agent had entered a building based on the building cost value in the info space and if so, I changed the lidar type of `entrapped_casualtys` and `walls` to use pseudo instead of psuedo_occluded. \
+Once I got these bugs fixed, the lidar observations were returning what I expected. ![](Images/pseudo_occluded_lidar_demo.gif)\
+In the GIF above, each of the nested arrays correspond with the keys shown above the array. You can see that when the agent is outside the building, it can see the building (`terracotta_buildings_lidar_0`) but not the entrapped_casualtys. However, once it enters the building, the third and fourth lists (`entrapped_casualtys_lidar_0 && walls_lidar_0`) are populated with the pseudo lidar values for those obstacles. Then, once the agent leaves and goes behind a wall, the building lidar returns zeros.
+## Miscellaneous Tweaks
+1. **More Environments**: Added the ability to use safety-gymnasium native environments in SpecRLBench. I just had to add a try except statement that, if the `env_name` isn't one of the ones specified, then try to make the environment using safety-gymnasium's native `make()` method.
+2. **Better Gremlin Hitboxes**: Improved the gremlin hitbox and collision detection so they don't go out of the bounds of the agent, but are still reasonably close to the actual agent size. Needed to do this before adding costs for the agent since they don't carry any costs methods natively.
+3. **Lidar Trackers Disabled**: I set `self.render_conf.lidar_markers = False` so that the lidar tracker wouldn't render. This significantly boosted performance, and since I can already print out the values of the observation space myself and get a more granular understanding of what and what isn't being captured.  
+4. **Custom obs() Relocation**: I initially had the new obs() conditions (e.g. `inside_building`) in the `BaseTask`. However, I have since relocated it to the `MultiGoalSar`task but kept the pseudo_occluded lidar in the BaseTask so that other tasks can use it but the specific conditions I have set stay isolated to me environment. 
+# 07-08-26
+## Meeting with Dr. Li
+- Consider levels of generalization (every run, every seed, different dynamics, etc.). It is important to be able to identify or expand upon generalization iterably (not dive head-first into real env)
+- Observation space can include multiple sensors. You should consider what sensors you want, what data you want to receive from it.
+- Reward Engineering & Reward Hacking: Agent could try to "farm" rewards instead of actually completing the goal, so it's important to consider how rewards are being given to avoid this behavior. Also, important to not have too 'conservative' rewards so that agent balances exploration with exploitation.
+- Start with simple tasks, information, etc. and then build on that towards a more complex task.
+- Discrete vs continuous action space: Continuous is what the current env is using, PPO is likely the algorithm of choice
+## Migrating to BU-DEPEND-Lab
+I had to migrate the repo that currently lived locally to the RISE-2026 repo in the BU Depend Lab organization. However, James was already using that repo for his own work, which is not related (codewise) to mine. So, he had to merge his changes, make a new branch with his code while I made one with mine, and clear the main branch. We plan to use the main branch to summarize our work and include links so that it's easier to find our work.
+>[!success] When talking to Dr. Li, he mentioned that I can also have the repository on my own personal GitHub account, so once the internship ends, I will probably fork my branch to my personal one so that it's easier for me to share.
+## Remote Desktop Setup
+Now that I had approval from Zijian to try to move forward with setting up the repository in the remote desktop. I knew that James had already done something similar, so I asked him for help. He told me that I should create the repository from VS Code because it creates a tunnel that bypasses the auth required if using the terminal in the remote desktop. Once I SSH'd in on my local machine, I was able to clone the Depend Lab repository and checkout my branch. \
+Yet I ran into an issue where the SpecRLBench submodule I had created wasn't being pulled with the rest of the code, so with James' guidance I removed the submodule so that the whole repository is self-contained. \
+However, I saw that there was a bunch of cached `*.pyc` files that were being added to the repository, so I had to add a new `.gitignore` in the `RISE-2026` folder with these contents:
+```bash
+# Python bytecode and cache directories (any depth)
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
 
+```
+And then modify the `.gitgnore` that existed in SpecRLBench to exclude `**/__pycache__/`. I also had to clear the cache using
+```bash
+git ls-files '**/__pycache__/**' '**/*.pyc' | while read -r file; do 
+	git rm --cached "$file" 
+done
+```
+After which I committed and pushed the changes to the repo. \
+When I tried to run the conda environment, however, I would get an error that told me that the gymnasium version I was using wouldn't work with one of the variables I was requesting. So, in `SpecRLBench/setup.py` and `SpecRLBench/specbench/envs/zones/safety-gymnasium/pyproject.toml`, I had to specify that `gymnasium>=0.29.1,<1.0` and after that, it didn't give me that error. \
+It did give me another error, though, claiming that it couldn't render to the screen because the DISPLAY had not been set. To fix this, I ran the commands below and it worked!
+```bash
+# In remote desktop
+echo $DISPLAY
+# In VSCode RD Terminal
+export DISPLAY=":10"
+```
+## PPO Setup
+Once I had the repo set up, it wasn't that hard to set up the existing conda environment I had to make for SpecRLBench and install Stable Baselines to it. I ran
+```bash
+conda install conda-forge::stable-baselines3
+```
+in the VSCode remote desktop terminal and it worked out of the box. I tested it using this code:
+```python
+import gymnasium as gym
+from stable_baselines3 import PPO
 
+# 1. Initialize the standard Gymnasium environment
+env = gym.make("CartPole-v1")
+
+# 2. Instantiate the PPO Agent 
+# "MlpPolicy" is used for feature vectors (like positions and velocities)
+model = PPO(
+    "MlpPolicy",
+    env,
+    verbose=1,
+    learning_rate=0.0003,
+    device="cpu"
+)
+
+# 3. Train the agent
+model.learn(total_timesteps=100000)
+
+# 4. Evaluate the trained agent
+env = gym.make("CartPole-v1", render-mode="human")
+obs, info = env.reset()
+total_reward = 0
+episodes = 10
+
+for episode in range(episodes):
+    obs, info = env.reset()
+    episode_reward = 0
+    done = False
+
+    while not done:
+        action, _ = model.predict(obs, deterministic=True)
+        obs, reward, terminated, truncated, info = env.step(action)
+
+        episode_reward += reward
+        done = terminated or truncated
+
+    print(f"Episode {episode+1}: {episode_reward}")
+```
+And when it displayed the model running autonomously in the human view, the training had worked! This was really cool to me and made me excited to start trying it out. \
+## Literature Review
+When I tried it, though, I realized that I needed to do a lot to actually make it work. For one, I didn't actually know what model to use for this process. I knew that I would need a PPO (which is why I chose this), but beyond that, I didn't know what, how, or why PPO. I wanted to conduct a literature review of what PPO is and what is currently being used by similar setups to my own in prior research.
+### Learning About PPO
+*To learn what PPO was, I used the [Arxiv Insights](https://www.youtube.com/watch?v=5P7I-xPq8u8) channel recommended on the Stable Baselines documentation page for PPO as a reference.*
+- RL relies on training data that is self-generated using the environment, which in of and itself is based on the policy that is trained by the data
+- Distributions of observations and rwards are changing, causing instability
+- High sensitivity to hyperparameters
+- Balance between simplicity in code, tuning, sampling
+- Online learning >> learns directly from environment encounters
+*Policy Gradient Loss*
+![365](Images/policy_gradient_loss_function.png)
+pi_theta - Neural network that takes states as input and outputs actions
+A_t - Advantage estimate. Estimate of relative value of selected action in current state. 
+- Determine whether action taken was better/worst than expected
+-A_t = Discounted Rewards (Return) - Baseline Estimate (Value)
+-- Return: Weighted sum of rewards currently found with gamma that changes prioritization of immediate vs. long-term rewards. This is found after the episode is over, so we know all rewards
+-- Value Function: Expectation/Estimate discounted sum of rewards from this point. Variance because it's running a neural network
+- If positive advantage, increase probability of choosing this action the next time; vice versa
+**Trust Region Policy Optimization**
+- Make sure new policy isn't too different from old policy
+- Similar to normal Policy Gradient, but instead of log() divides by the old policy
+- Adds KL constraint to policy objective - Stick close to region where thing works
+**Proximal Policy Optimization**
+*Objective Function*
+- r(theta) denotes ratio of an action being taken in new vs. old policy
+-- >1 if more probable, ||<1 if less probable
+-- r(theta) x A_t = TRPO
+![](Images/ppo_objective_function.png)
+1st term = Normal policy gradients
+2nd term = Clipped version of 1st term
+Minimum of these two terms is expected reward
+- Limit policy gradient steepness after a single estimate unless large inverse effect from what was believed before
+- E.g. if action thought to be bad but was actually good, then try to reverse previous policy. Vice versa
+- But if policy was good and this sample is bad, could just be noise (optimistic)
+*Loss Function*
+![](Images/ppo_loss_function.png)
+1st new term = Updates baseline network. Estimates average amount of discounted reward. Shares parameters with main PPO objective
+2nd new term = Entropy term. Makes sure agent does enough exploration. Measures how unpredictable an outcome can be
+Hyperparameters to weight the contributions of these two new terms
+### PPO Variations
+From what I could tell, though, PPO did not extend to multi-agent environments. As such, I wanted to find more information about the different PPO types when I found MARLlib, which appears to be a RL algorithm library specifically for Multi-Agent environments. In those docs, I found an explanation of the [PPO Family](https://marllib.readthedocs.io/en/latest/algorithm/ppo_family.html), which I took notes on below:
+#### IPPO
+![](Images/ippo_workflow_marllib.png)
+*i.e. Independent PPO*
+- In IPPO, each agent has their own policy and critic, but that policy/critic model can be shared between all of the agents
+- This allows for many different task types with a very similar implementation to standard PPO
+- IPPO does not require information sharing, but it can be implemented if you'd like
+	- **Information Sharing**: Sharing either data (obs, action, etc.), predicted data (critic value, message, etc.), or knowledge (replay buffer, model parameters, etc.)
+- In IPPO, agents do not have access to the global state if they are in a partially observed setting (e.g. SAR)
+#### MAPPO
+![](Images/mappo_workflow_marllib.png)
+*i.e. Multi-Agent PPO*
+- MAPPO is built off of IPPO, but they share observations and actions so that they can coordinate tasks
+	- Example of CTDE (Centralized Training, Decentralized Execution). The agents will share data, but their actions are independently controlled by their policy.
+- Inputs to centralized V function is crucial because it controls the DE of the agents
+- MAPPO can be conducted in parallel (since parameters are share across agents), making it similar in speed to off-policy algorithms with enough parallelization
+# 07-09-26
+Today, I worked on debugging the PPO and adjusting the rewards so that the agents would complete the goals in the manner I expected.
+## SAR Levels
+After conducting my literature review (specifically [this](https://github.com/elte-collective-intelligence/student-search#abstract)GitHub repository), I decided that it would be a good idea to add levels to my environments. This way, I could more easily test the PPO algorithm without jumping straight into the super complex task, which will probably take longer to train as well. In the end, I made four levels, each with two agents:
+- Level 0: Only surface casualties (N=`agent_num`). This is what I am using for testing the PPO, rewards, etc.
+- Level 1: Half surface casualties, half entrapped casualties. I want to see whether providing rewards for going into buildings is good or not, so this is a good start
+- Level 2: Same as L1, but with walls (N=5). This will allow me to tune how navigation works to encourage exploration but balance exploitation
+- Level 3: Same as L2, but with more walls (N=20). This is the same as the original task I had created; I just had to work backwards to make it. \
+I included most of the setup in Level 0 (e.g. instance variables, `psuedo_occluded` observations), which made the subsequent levels (which inherited the previous level) easier to program. \
+Since I had changed how the SAR tasks were created, I had to change how it was redirected in `task_utils.py`:
+```python
+if 'SAR' in task_id:
+                task_num = re.search(r'LTL(\d)', task_id).group(1)
+                class_name = f'MultiGoalSAR{task_num}'
+```
+Once I did that, I could initialize multiple tasks in the `__init__.py` file where the other environments are initialized:
+```python
+multi_goal_tasks = {
+	# ...
+	'LTL0MASAR2': {'agent_num': 2},
+    'LTL1MASAR2': {'agent_num': 2},
+    'LTL2MASAR2': {'agent_num': 2},
+    'LTL3MASAR2': {'agent_num': 2},
+    'LTL3MASAR5': {'agent_num': 5}, # == 'LTLMASAR5'
+}
+```
+Since I had also gotten rid of the entrapped casualties in L0, I had to put the part of the code that dealt with zeroing the `entrapped_casualtys_lidar_{i}` in a try-except block. \
+### More Env Scripts
+Between the PPO environments, the testing environments, and the debug environment, there were now too much going on inside `test_env.py`. So, I added `debug_env.py` and `ppo_env.py` for their eponymic environments. I also reverted my changes to the testing environment so it is back to just testing the legitimacy of the custom and native environments. \
+More environment scripts, though, meant that there were some methods that were being duplicated between them, most notably the `make_env()`, which I standardized into a `utils\env_utils.py` file that could be accessed by any new environment I made.
+## SAR Task Integration
+Because SB takes in different types for its actions and observations than Gym, I had to manipulate the spaces so that they were compatible with both. I controlled this manipulation with a new parameter `sb3=False`.
+### Action Space
+The first error I was receiving was in regards to the submitted action space to the PPO model. According to its [documentation](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html#can-i-use), the action space cannot be a Dict, which is what the Gym API outputs natively (since each agent has an entry). So, I had to create two methods: one that submits the action space as a Box if SB3 if active (`if callable(act_space): act_space = Box(low=-1.0, high=1.0, shape=(self.num_agents*self.action_dim,)))`) and another one to transform the SB3 input into a dictionary:
+```python
+def dictify_action(self, action) -> dict:
+        actions = {
+            f"agent_{i}": action[i * self.action_dim:(i + 1) * self.action_dim]
+            for i in range(self.num_agents)
+        }
+        return actions
+```
+Once that worked, I moved on to formatting the observation space as expected by the model. *Note: This does mean that it controls both agents simultaneously using the same models rather than two independent models i.e. IPPO. Zijian recommended this so that we could test the PPO env.*
+### Observation Space
+The observation space wasn't as difficult to manipulate because it had already been flattened when it was submitted to Gym, which worked with SB3. However, the space it returned was not the same as the one it claimed (again, because `num_agents>1` and it would make a dict for each of them). Therefore, I had to make a method to flatten the observation so that it wasn't a nested dict:
+```python
+    def flatten_obs(self, obs):
+            flat = {
+                k: v
+                for agent_obs in obs.values()
+                for k, v in agent_obs.items()
+            }
+            return flat
+```
+and return it to the model if SB3 is enabled.
+### Reward, Terminated, Truncated Flattening
+The first time I ran it though, even with 1000 timesteps, it was taking 20+ minutes. The output was also not good: the model still seemed to be moving completely randomly. After looking into the code, I saw that the `terminated` and `truncated` values were dictionaries with the values, which would automatically return `True` every step of the episode. This didn't impact `debug_env.py` since it was running the MA-compatible Gym API, but it meant that I had to `any(list(Dict.values()))` for both of them. \
+In a similar vein, the rewards were in a Dict object, which isn't compatible with what PPO believes is a single agent environment. I just summed the rewards to get one "big" reward, but I might see what happens if I average them instead (TBD).
+## PPO Reward Engineering
+There was a lot of tweaking I did to get a model I was ~70% happy with, so I'm going to summarize what I did:
+- Eliminated the `lidar_conf.max_dist` by setting it to `None`, so that the agents could observe more of the environment.
+- Made finding the casualties a one-time reward rather than a continuous one. When thinking about the task, that does make sense as well, since staying next to a casualty doesn't make them any better.
+- Made the environment walls and removed the termination when they were hit (but kept the penalty)
+- Increased the damping force of the joints in the `point` so that it's less slippery. It might be placebo, but I think it's easier to control and I saw better results afterwards
+- Removed gremlin cost check at reset--since they haven't moved yet, it would return errors if they were too close to the agent(s)
+- Changed rewards to be within `[-1, 1]` because according to information online, it's better for PPO algorithms. Current rewards:
+```python
+    _reward_find_casualty = 1.0
+    _reward_agent_collision = -0.05
+    _reward_casualty_scalar = 0.0 # * 1000 = 1.0 == _reward_find_casualty
+    _reward_wall_collision = -0.5
+```
+- Implemented but ultimately did not run dense rewards using lidar observations to encourage the agent to move closer to the casualty. Because the reward from this trickle was more than the reward of the casualty over 1000 timesteps
+- Added vectorized environment creation to `env_utils.py` to reduce training time from ~28 min to ~20 min \ 
+- Added logging of models and training logs so that models can be replayed and training can be compared over time, respectively. I also have a f-string making the model path so that models will be saved according to the environment they were trained in
+- Changed evaluation episodes to 10 (more for myself)--can more easily diagnose potential issues.
 
 --- 
 #project/idea 
