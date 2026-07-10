@@ -6,6 +6,11 @@
 
 # Table of Contents
 - [Sources](#sources)
+	- [ROS](#ros)
+	- [SpecRLBench](#specrlbench)
+		- [Repositories](#repositories)
+		- [Documentation](#documentation)
+		- [Miscellaneous](#miscellaneous)
 - [Papers](#papers)
 - [Task Levels](#task-levels)
 - [TODO](#todo)
@@ -59,6 +64,23 @@
 		- [Idea B - Pseudo Lidar Occluded](#idea-b---pseudo-lidar-occluded)
 		- [Debugging Idea B](#debugging-idea-b)
 	- [Miscellaneous Tweaks](#miscellaneous-tweaks)
+- [07-08-26](#07-08-26)
+	- [Meeting with Dr. Li](#meeting-with-dr-li)
+	- [Migrating to BU-DEPEND-Lab](#migrating-to-bu-depend-lab)
+	- [Remote Desktop Setup](#remote-desktop-setup)
+	- [PPO Setup](#ppo-setup)
+	- [Literature Review](#literature-review)
+		- [Learning About PPO](#learning-about-ppo)
+		- [PPO Variations](#ppo-variations)
+- [07-09-26](#07-09-26)
+	- [SAR Levels](#sar-levels)
+		- [More Env Scripts](#more-env-scripts)
+	- [SAR Task Integration](#sar-task-integration)
+		- [Action Space](#action-space)
+		- [Observation Space](#observation-space)
+		- [Reward, Terminated, Truncated Flattening](#reward-terminated-truncated-flattening)
+	- [PPO Reward Engineering](#ppo-reward-engineering)
+
 # Sources
 ## ROS
 [ROS Ubuntu Installation](https://wiki.ros.org/noetic/Installation/Ubuntu) \
