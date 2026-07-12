@@ -83,33 +83,31 @@
 
 # Sources
 ## ROS
-[ROS Ubuntu Installation](https://wiki.ros.org/noetic/Installation/Ubuntu) \
-[Information Slideshow](https://docs.google.com/presentation/d/1C7Mwcdt3m7QfknjxOcZXIfugGhLVEKumrAQWOlkqRtM/edit?pli=1&slide=id.p#slide=id.p) \
-[tf tutorials](https://wiki.ros.org/tf/Tutorials) \
-[geometry msgs wiki](https://docs.ros.org/en/noetic/api/geometry_msgs/html/index-msg.html) \
-[pubsub with python](https://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber(python)) \
-[frames](/_pages/rise/frames.pdf) \
+- [ROS Ubuntu Installation](https://wiki.ros.org/noetic/Installation/Ubuntu) 
+- [Information Slideshow](https://docs.google.com/presentation/d/1C7Mwcdt3m7QfknjxOcZXIfugGhLVEKumrAQWOlkqRtM/edit?pli=1&slide=id.p#slide=id.p) 
+- [tf tutorials](https://wiki.ros.org/tf/Tutorials) 
+- [geometry msgs wiki](https://docs.ros.org/en/noetic/api/geometry_msgs/html/index-msg.html) 
+- [pubsub with python](https://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber(python)) 
+- [frames](/_pages/rise/frames.pdf)
 ## SpecRLBench
 ### Repositories
-[SpecRLBench](https://github.com/BU-DEPEND-Lab/SpecRLBench) \
-[RISE Python Training](https://github.com/akhaled247/rise_python_training/tree/main) \
-[akhaled247/SpecRLBench](https://github.com/akhaled247/SpecRLBench) \
-[BURISE-26 Project Repository](https://github.com/BU-DEPEND-Lab/RISE-2026) \
-[SB3 GitHub Repo](https://github.com/DLR-RM/stable-baselines3/tree/master) \
-[MARLlib (IPPO Impl)](https://github.com/Replicable-MARL/MARLlib/blob/master/marllib/marl/algos/scripts/ippo.py)
-[SAR MARL](https://github.com/elte-collective-intelligence/student-search#abstract)
-
+- [SpecRLBench](https://github.com/BU-DEPEND-Lab/SpecRLBench) 
+- [RISE Python Training](https://github.com/akhaled247/rise_python_training/tree/main) 
+- [akhaled247/SpecRLBench](https://github.com/akhaled247/SpecRLBench) 
+- [BURISE-26 Project Repository](https://github.com/BU-DEPEND-Lab/RISE-2026) 
+- [SB3 GitHub Repo](https://github.com/DLR-RM/stable-baselines3/tree/master) 
+- [MARLlib (IPPO Impl)](https://github.com/Replicable-MARL/MARLlib/blob/master/marllib/marl/algos/scripts/ippo.py)
+- [SAR MARL](https://github.com/elte-collective-intelligence/student-search#abstract)
 ### Documentation
-[Gymnasium Documentation](https://gymnasium.farama.org/tutorials) \
-[MuJoCo Creating Models](https://mujoco.readthedocs.io/en/latest/XMLreference.html) \
-[RL Baselines3 Zoo](https://stable-baselines3.readthedocs.io/en/master/guide/rl_zoo.html) \
-[SB3 PPO](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html) \
-[MARLlib (PPO Family)](https://marllib.readthedocs.io/en/latest/algorithm/ppo_family.html#proximal-policy-optimization-a-recap)
+- [Gymnasium Documentation](https://gymnasium.farama.org/tutorials) 
+- [MuJoCo Creating Models](https://mujoco.readthedocs.io/en/latest/XMLreference.html) 
+- [RL Baselines3 Zoo](https://stable-baselines3.readthedocs.io/en/master/guide/rl_zoo.html) 
+- [SB3 PPO](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html) 
+- [MARLlib (PPO Family)](https://marllib.readthedocs.io/en/latest/algorithm/ppo_family.html#proximal-policy-optimization-a-recap)
 ### Miscellaneous
-[SARE Spawning Zone Desmos Calculator](https://www.desmos.com/calculator/bcqjpzneh6) \
-[TensorBoard (localhost)](http://localhost:6006/?pinnedCards=[{%22plugin%22%3A%22scalars%22%2C%22tag%22%3A%22train%2Fexplained_variance%22}%2C{%22plugin%22%3A%22scalars%22%2C%22tag%22%3A%22train%2Floss%22}%2C{%22plugin%22%3A%22scalars%22%2C%22tag%22%3A%22train%2Fvalue_loss%22}%2C{%22plugin%22%3A%22scalars%22%2C%22tag%22%3A%22train%2Fstd%22}]&darkMode=true#timeseries&runSelectionState=eyJQUE9fMSI6ZmFsc2UsIlBQT18yIjpmYWxzZSwiUFBPXzMiOnRydWUsIlBQT180IjpmYWxzZSwiUFBPXzUiOnRydWV9) \
-[Practical Tips For Reliable RL](https://araffin.github.io/slides/tips-reliable-rl/) \
-
+- [SARE Spawning Zone Desmos Calculator](https://www.desmos.com/calculator/bcqjpzneh6) \
+- [TensorBoard (localhost)](http://localhost:6006/?pinnedCards=[{%22plugin%22%3A%22scalars%22%2C%22tag%22%3A%22train%2Fexplained_variance%22}%2C{%22plugin%22%3A%22scalars%22%2C%22tag%22%3A%22train%2Floss%22}%2C{%22plugin%22%3A%22scalars%22%2C%22tag%22%3A%22train%2Fvalue_loss%22}%2C{%22plugin%22%3A%22scalars%22%2C%22tag%22%3A%22train%2Fstd%22}]&darkMode=true#timeseries&runSelectionState=eyJQUE9fMSI6ZmFsc2UsIlBQT18yIjpmYWxzZSwiUFBPXzMiOnRydWUsIlBQT180IjpmYWxzZSwiUFBPXzUiOnRydWV9) \
+- [Practical Tips For Reliable RL](https://araffin.github.io/slides/tips-reliable-rl/) 
 # Papers
 | URL                                                              |
 | ---------------------------------------------------------------- |
@@ -130,17 +128,18 @@
 > Based on meetings with Zijian and mentor-mentee agreement goals
 - ~~*Agent spawning inner radius*~~
 - ~~Change building spawning to have walls around them (extend `LTLWall`)~~
-~~- *Lidar observed = false for entrapped casualties, revert to `pseudo` lidar*~~
-~~- [identify] rewards/punishments~~
-~~- Test manually (i.e. keyboard)~~
-~~- take each lidar observation for each lidar_observable , find the smallest number, and set the other lidar_observable numbers for that ray to 0~~
-- Policy - Use existing libraries (stable baselines; PPO) - start with simple tasks (e.g. go to a location), then expand to more complicated tasks
-	- StableBaselines (install conda, then have folder with SpecRLBench 
-	- For policy training use lambda machine
-- LLM where we specify agent and casualties and explain what to avoid etc. and have LLM generate high level plan, call low level controller (a*, something else)
-~~- Migrate `BURISE-2026` personal repo to `BU-DEPEND-Lab`~~
-~~- Debug new level system~~
-~~- Format `action`, `obs`, `info` space so that it works with PPO vis  ~~
+- ~~*Lidar observed = false for entrapped casualties, revert to `pseudo` lidar*~~
+- ~~identify rewards/punishments~~
+- ~~Test manually (i.e. keyboard)~~
+- ~~take each lidar observation for each lidar_observable , find the smallest number, and set the other lidar_observable numbers for that ray to 0~~
+- Policy - ~~Use existing libraries (stable baselines; PPO) - start with simple tasks (e.g. go to a location~~), then expand to more complicated tasks
+	- ~~StableBaselines (install conda, then have folder with SpecRLBench~~ 
+	- ~~For policy training use lambda machine~~
+- ~~Migrate `BURISE-2026` personal repo to `BU-DEPEND-Lab`~~
+- ~~Debug new level system~~
+- ~~Format `action`, `obs`, `info` space so that it works with PPO vis  ~~
+- LLM where we specify agent and casualties and explain what to avoid etc. and have LLM generate high level plan, call low level controller (A*, something else)
+
 # 06-29-26
 We attempted to set up ROS Noetic on Ubuntu 20.04 within a docker container within a remote desktop. Initially, this is the command we chose:
 ## Old Command
@@ -714,7 +713,7 @@ From what I could tell, though, PPO did not extend to multi-agent environments. 
 # 07-09-26
 Today, I worked on debugging the PPO and adjusting the rewards so that the agents would complete the goals in the manner I expected.
 ## SAR Levels
-After conducting my literature review (specifically [this](https://github.com/elte-collective-intelligence/student-search#abstract)GitHub repository), I decided that it would be a good idea to add levels to my environments. This way, I could more easily test the PPO algorithm without jumping straight into the super complex task, which will probably take longer to train as well. In the end, I made four levels, each with two agents:
+After conducting my literature review (specifically [this](https://github.com/elte-collective-intelligence/student-search#abstract) GitHub repository), I decided that it would be a good idea to add levels to my environments. This way, I could more easily test the PPO algorithm without jumping straight into the super complex task, which will probably take longer to train as well. In the end, I made four levels, each with two agents:
 - Level 0: Only surface casualties (N=`agent_num`). This is what I am using for testing the PPO, rewards, etc.
 - Level 1: Half surface casualties, half entrapped casualties. I want to see whether providing rewards for going into buildings is good or not, so this is a good start
 - Level 2: Same as L1, but with walls (N=5). This will allow me to tune how navigation works to encourage exploration but balance exploitation
@@ -737,7 +736,7 @@ multi_goal_tasks = {
     'LTL3MASAR5': {'agent_num': 5}, # == 'LTLMASAR5'
 }
 ```
-Since I had also gotten rid of the entrapped casualties in L0, I had to put the part of the code that dealt with zeroing the `entrapped_casualtys_lidar_{i}` in a try-except block. \
+Since I had also gotten rid of the entrapped casualties in L0, I had to put the part of the code that dealt with zeroing the `entrapped_casualtys_lidar_{i}` in a try-except block.
 ### More Env Scripts
 Between the PPO environments, the testing environments, and the debug environment, there were now too much going on inside `test_env.py`. So, I added `debug_env.py` and `ppo_env.py` for their eponymic environments. I also reverted my changes to the testing environment so it is back to just testing the legitimacy of the custom and native environments. \
 More environment scripts, though, meant that there were some methods that were being duplicated between them, most notably the `make_env()`, which I standardized into a `utils\env_utils.py` file that could be accessed by any new environment I made.
@@ -773,8 +772,13 @@ In a similar vein, the rewards were in a Dict object, which isn't compatible wit
 There was a lot of tweaking I did to get a model I was ~70% happy with, so I'm going to summarize what I did:
 - Eliminated the `lidar_conf.max_dist` by setting it to `None`, so that the agents could observe more of the environment.
 - Made finding the casualties a one-time reward rather than a continuous one. When thinking about the task, that does make sense as well, since staying next to a casualty doesn't make them any better.
-- Made the environment walls and removed the termination when they were hit (but kept the penalty)
-- Increased the damping force of the joints in the `point` so that it's less slippery. It might be placebo, but I think it's easier to control and I saw better results afterwards
+- Made the environment walls collidable and removed the termination when they were hit (but kept the penalty)
+- Increased the damping force of the joints in the `point` so that it's less slippery. It might be placebo, but I think it's easier to control and I saw better results afterwards.
+	```python
+		# Old = 0.005
+      <joint type="slide" axis="1 0 0" name="x" damping="0.0075"/>
+      <joint type="slide" axis="0 1 0" name="y" damping="0.0075"/>
+	```
 - Removed gremlin cost check at reset--since they haven't moved yet, it would return errors if they were too close to the agent(s)
 - Changed rewards to be within `[-1, 1]` because according to information online, it's better for PPO algorithms. Current rewards:
 ```python
@@ -784,9 +788,11 @@ There was a lot of tweaking I did to get a model I was ~70% happy with, so I'm g
     _reward_wall_collision = -0.5
 ```
 - Implemented but ultimately did not run dense rewards using lidar observations to encourage the agent to move closer to the casualty. Because the reward from this trickle was more than the reward of the casualty over 1000 timesteps
-- Added vectorized environment creation to `env_utils.py` to reduce training time from ~28 min to ~20 min \ 
+- Added vectorized environment creation to `env_utils.py` to reduce training time from ~28 min to ~20 min
 - Added logging of models and training logs so that models can be replayed and training can be compared over time, respectively. I also have a f-string making the model path so that models will be saved according to the environment they were trained in
-- Changed evaluation episodes to 10 (more for myself)--can more easily diagnose potential issues.
+- Changed evaluation episodes to 10 (more for myself)-can more easily diagnose potential issues.
+# 07-10-26
+
 
 --- 
 #project/idea 
