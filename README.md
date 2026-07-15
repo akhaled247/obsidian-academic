@@ -457,10 +457,10 @@ Now I have a much more descriptive class and environment name than `LTL3MA5`, wh
 I've added the following code into `SpecRLBench\specbench\envs\zones\safety-gymnasium\safety_gymnasium\utils\registration.py`. If you ever have issues with this process or get an error like `Environment {id} is not registered in safety-gymnasium`, then you can look into this and see if you're environment has been registered. For me, I kept it broader since I had actually flipped the way the registration worked, so instead of `LTLMASAR` I had written `LTLSARMA`, which threw an error. Just so that you're aware!
 ```python
 safe_registry_custom = []
-        for env in safe_registry:
-            if "MA" in env:
-                safe_registry_custom.append(env)
-        print(safe_registry_custom)
+for env in safe_registry:
+	if "MA" in env:
+		safe_registry_custom.append(env)
+print(safe_registry_custom)
 ```
 # 07-06-26
 ## Agent Spawn Parameters
@@ -495,7 +495,7 @@ def _add_n_geoms(self, n: int, geom: Geom, base_name: str, *kwargs):
 This did not work. According to AI, it has to do with me trying to call the `geom` parameter even though that isn't how Python classes work, and the `kwargs` shouldn't be utilized in that way. Because of this, I went to a simpler for loop within the init function:
 ```python
 for i in range(self.agent_num):
-            self._add_geoms(LtlWalls(name=f"building{i}_ltl_walls"))
+	self._add_geoms(LtlWalls(name=f"building{i}_ltl_walls"))
 ```
 You'll notice that the {i} is not at the end of the name, as you may expect (and as I did, too). Initially, I had it as `f"building_ltl_walls_{i}"`, which I found out later did not work. \
  For now, though, I used the same for loop to initialize the building walls with the locations from `self._cached_building_locations[i]` so that each instance wouldn't try to sample an incorrect location and "double up" on a single building. \ 
@@ -516,15 +516,15 @@ I had an unusual number of tweaks I made to names of parameters, keys, and class
 With the way the simulation was currently set up (i.e. the seed), there were two buildings that were spawning inside one another (see pictures above). However, there was plenty of space at the bottom of the sim for a building to go; it wasn't being used, though, since the placements are randomly sampled and that sampling had led multiple buildings to spawn in the same quadrant, causing the clumping seen. To make them more spread out, I manually forced each iteration to move into the subsequent quadrant using this method:
 ```python
 def draw_border_placement_from_loop(
-        side_length: float, 
-        margin: float, 
-        keepout: float,
-        i: int, 
-        random_generator: RandomGenerator):
-        
-    return random_generator.draw_placement(
-            placements=[border_placements(side_length, margin)[i%4]], 
-            keepout=keepout
+	side_length: float, 
+	margin: float, 
+	keepout: float,
+	i: int, 
+	random_generator: RandomGenerator):
+	
+	return random_generator.draw_placement(
+		placements=[border_placements(side_length, margin)[i%4]], 
+		keepout=keepout
             )
 ```
 ### Color Additions
@@ -722,8 +722,8 @@ I included most of the setup in Level 0 (e.g. instance variables, `psuedo_occlud
 Since I had changed how the SAR tasks were created, I had to change how it was redirected in `task_utils.py`:
 ```python
 if 'SAR' in task_id:
-                task_num = re.search(r'LTL(\d)', task_id).group(1)
-                class_name = f'MultiGoalSAR{task_num}'
+	task_num = re.search(r'LTL(\d)', task_id).group(1)
+	class_name = f'MultiGoalSAR{task_num}'
 ```
 Once I did that, I could initialize multiple tasks in the `__init__.py` file where the other environments are initialized:
 ```python
@@ -746,23 +746,23 @@ Because SB takes in different types for its actions and observations than Gym, I
 The first error I was receiving was in regards to the submitted action space to the PPO model. According to its [documentation](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html#can-i-use), the action space cannot be a Dict, which is what the Gym API outputs natively (since each agent has an entry). So, I had to create two methods: one that submits the action space as a Box if SB3 if active (`if callable(act_space): act_space = Box(low=-1.0, high=1.0, shape=(self.num_agents*self.action_dim,)))`) and another one to transform the SB3 input into a dictionary:
 ```python
 def dictify_action(self, action) -> dict:
-        actions = {
-            f"agent_{i}": action[i * self.action_dim:(i + 1) * self.action_dim]
-            for i in range(self.num_agents)
-        }
-        return actions
+	actions = {
+		f"agent_{i}": action[i * self.action_dim:(i + 1) * self.action_dim]
+		for i in range(self.num_agents)
+	}
+	return actions
 ```
 Once that worked, I moved on to formatting the observation space as expected by the model. *Note: This does mean that it controls both agents simultaneously using the same models rather than two independent models i.e. IPPO. Zijian recommended this so that we could test the PPO env.*
 ### Observation Space
 The observation space wasn't as difficult to manipulate because it had already been flattened when it was submitted to Gym, which worked with SB3. However, the space it returned was not the same as the one it claimed (again, because `num_agents>1` and it would make a dict for each of them). Therefore, I had to make a method to flatten the observation so that it wasn't a nested dict:
 ```python
-    def flatten_obs(self, obs):
-            flat = {
-                k: v
-                for agent_obs in obs.values()
-                for k, v in agent_obs.items()
-            }
-            return flat
+def flatten_obs(self, obs):
+	flat = {
+		k: v
+		for agent_obs in obs.values()
+		for k, v in agent_obs.items()
+	}
+	return flat
 ```
 and return it to the model if SB3 is enabled.
 ### Reward, Terminated, Truncated Flattening
@@ -792,7 +792,146 @@ There was a lot of tweaking I did to get a model I was ~70% happy with, so I'm g
 - Added logging of models and training logs so that models can be replayed and training can be compared over time, respectively. I also have a f-string making the model path so that models will be saved according to the environment they were trained in
 - Changed evaluation episodes to 10 (more for myself)-can more easily diagnose potential issues.
 # 07-10-26
+Today, I struggled a lot with the implementation of PPO into the current multi-agent environment. I tried multiple different techniques to try to improve the model, but by the end of the day, I had gotten to the same place I had started with.
+## Lower Rollout Sample Steps
+Before, I had the number of steps at `2048`, but I realized that since I was running 8 environments in parallel, I needed that number to be `2048//8 # == 256` so that the sample size would be the same as it was with one environment.  
+## casualty_lidar_ids
+After talking with Zijian, he pointed out that even though I was giving the agents the lidar observations for each of the casualties, it was returning the *category* of the object rather than the actual object. As such, when implementing LTL or separate goals in the future, the agent would have to simply guess and check to find its target, which wouldn't make sense in the current setup. Therefore, he suggested that there could be an additional observation that is returned that provides the agent with the ID numbers of the casualties it can see. That way, the agent can make a more informed decision in the future, when they have to go towards a specific casualty. So, this was what I spent the majority of the day doing. \
+The first thing I wanted to do was create an optional property that would allow certain geoms to be "ID'd," which in my case was `is_lidar_ids_observed`. Once I did that, then I could edit the existing `_obs_lidar_pseudo_occluded_new()` method to include the new property. Regardless of the whether or not the ids are observed, I create two observations: one for the lidar values and one for the ids. The IDs are passed into the method, and if one of the values is updated in the value observation, the associated ID will be inputted into the IDs observation. All ids are initially `-1` since that will never be a valid ID and serves as a replacement for the `0.` placeholder that is generated from `np.zeroes()`
+```python
+if value > vals[b]:
+	vals[b] = value
+	if ids is not None and instance_id is not None:
+		ids[b] = instance_id
+```
+Once everything is collected, then the return method checks `if return_ids` and returns both the vals and the ids, otherwise it will juts return the vals. This way, the same method can be used for both ID'd and non-ID'd obstacles without significant code changes. \
+```python
+#With lidar IDs
+lidar, lidar_ids = self._obs_lidar_pseudo_occluded_new(
+	i, obstacle, return_ids=True,
+)
+# Without lidar IDs
+lidar = self._obs_lidar_pseudo_occluded_new(
+	i, obstacle, return_ids=False,
+)
+```
+Now, the agent knows the distance and ID of each of the objects:
+```sh
+vals = [0.31194658 0.07665562 0.         0.         0.         0.
+ 0.         0.         0.         0.         0.         0.
+ 1.         0.         0.06644159 0.23529096]
+ids = [ 1  1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1  0  1]
+```
+## Rewards Revisions and Reversions
+In an attempt to make the PPO algorithm more robust, I started researching what I might need to change to my observation space or reward function so that it would work well with the advantages of PPO. For instance, although Zijian recommended purely sparse rewards, I learned that denser rewards are better for PPO because in order to create a good critic function, the agent needs to receive feedback more often to choose whether action X was more advantageous than action Y. With sparse rewards, too many of the episodes return 0, which makes the critic function quite inaccurate. \
+### Idea A - Lidar-Scaled Dense Rewards
+The first and easiest idea I had was to multiply the max of the lidar values by some scalar so that I could weight it relative to the original function. However, I found that the agent would "hack" this policy by circling around the casualty rather than collecting it. This was also partly because there was no `goal_achieved()` return, so if I implemented a "decay" punishment for staying alive, it would affect all runs equally regardless of the action taken.
+### Idea B - Approach Reward
+Once I saw that reward hacking, then I thought about what would actually be a good reward on the way to finding the casualties. I realized that, to combat reward hacking, I can calculate the difference between the current and previous lidar maximum value. In essence, I'm calculating the "velocity" relative to the "origin" of the casualty. This prevents circling since that delta would be zero because the radius isn't changing. It also benefits PPO more by providing a "slope field" that helps guide the agent towards the casualty.
+## Weekly Status Report
+On request from Dr. Li, James and I made status reports describing the activities we have done, our goals, and the challenges we're facing. The slides are reproduced below:
+![](Images/w1_2_status_report_p1.png)
+![](Images/w1_2_status_report_p2.png)
+## EOD
+By the end of the day, though, the PPO algorithm was behaving very similarly to how it was initially, and I didn't see much improvement in performance. I wanted to make it work with one agent by the end of the weekend.
+# 7-11-26
 
+# 7-12-26
+Today, I was set on making the PPO algorithm work, at least with a single agent. I was able to get it to work:
+![](Images/single_agent_ppo_policy_success.gif) 
+# 7-13-26
+Since I made a lot of changes in order to get this to work and by the time it worked, I was extremely tired, I will be attempting to summarize them below. I also ran tests and variations on some of the parameters to see what would happen and document them.
+## Faster Layout Resampling
+Whenever I was training the model, I found that every time it had to reset, it was taking an unusually long amount of time. According to the progress bar provided by the SB3 API, it was running 9 iterations per second, which (across 500k steps) was projected to take 88 hours, which was just not feasible. \
+Looking through the code, it appeared that the entire world was being regenerated every time a new episode started, which was not necessary: the majority of the components were carried over between runs, and all that needed to be changed was the locations of the obstacles/agents to prevent overfitting. With this new `_fast_resample_layout()` method, I can simply regenerate the poses of the different objects in the environment without rebuilding their entire files from zero. Now, the ETA is ~3-4 minutes, which is ~80% faster than it was even when doing full `len=1000` episodes. \
+As part of this as well, I switched from the default `DummyVecEnv` to a `SubprocVecEnv` because it is the [default](https://stable-baselines3.readthedocs.io/en/master/guide/vec_envs.html#subprocvecenv) for complex environments that the user wants to run in parallel.
+## Per-Agent Tracking Cameras
+In `SpecRLBench/specbench/envs/zones/safety-gymnasium/safety_gymnasium/tasks/safe_multi_agent/world.py`, there was hardcoded multi-agent camera creation that only worked if there was agent 0 and agent 1. I changed it so how other parts of the multi_agent workspace function such that the number of new cameras is based on `self._agent.agent_num`. 
+## Separate Train/Load Scripts
+I was quite annoyed with having to comment out parts of the code to have training and loading work in the same script, so I just split them into individual scripts, which made it a lot easier to work on the training portion.
+## Hyperparameter Changes
+There were quite a few hyperparameters that I changed to improve model performance. A snippet of the final model creation code is shown below:
+```python
+model = PPO(
+	"MultiInputPolicy",
+	env,
+	verbose=1,
+	learning_rate=1e-4,
+	n_steps=512,
+	batch_size=256,
+	n_epochs=10, # default
+	ent_coef=0.01,
+	target_kl=0.02,
+	device=device, # default cuda:1
+	tensorboard_log=TRAINING_LOG_PATH,
+	seed=seed
+	)
+```
+1. `learning_rate`: By default, the learning rate is `3e-4`. However, I found that the model was settling into a local minimum (i.e. circling around the goal), so I changed it to above.
+2. `n_steps`: Initially `2048//8=256`, I doubled the value because it appeared that the model was still moving somewhat randomly (e.g. running into walls) with the initial value, so by increasing this value, the agent had more information with which they could work with when updating the policy. 512 is also about the same amount of time as the `max_episode_steps` was initially (has seen been increased in preparation for more complex environments), so I believe that before, 256 was simply not enough time for the agent to make meaningful progress toward the goal without it being driven in large part from entropy.
+3. `batch_size`: With a larger batch size than the default (64), policy updates are much smoother, which in complex environments is important. Especially since I plan to make much more complex environments in the future, starting off using a large minibatch size seemed useful.
+4. `ent_coef`: Originally 0, increasing the entropy coefficient prevents the model from collapsing too quickly, which I continuously found was a problem in my previous PPO iterations. 
+5. `target_kl`: Default `None`, by limiting the KL divergence of the model I could prevent large updates from occurring in the model, which in turn prevented the "cliffs" I was seeing in my earlier runs.
+6. `seed`: Honestly, I am surprised at how much of an effect setting the seed has on the policy. Initially, I had left this blank so that the agent would train on a variety of different scenarios. However, the agent kept just circling around. I believed this was because all of the variety would cause it to shoot for a local optimum rather than find better policies through exploration. Once I set the seed, the model performed a lot better than before.
+## Reward Logic Migration
+Based on the reference of other tasks created by Safety-Gym, I migrated all of the reward calculations to the `calculate_reward()` method of the `multi_goal_sar_0` task. For now, it just has the casualty reward calculations, but in the future I plan to use the buildings and other additional rewards to shape the agents' policy. \ 
+I've also normalized the rewards so that PPO doesn't overreact in its policy changes, since from what I've seen online, PPO likes rewards to be in the domain `[0, 1]` for it to work as effectively as possible. \
+I also messed with the scalar for `reward_distance`, which produced the following results:
+![](Images/reward_distance_adjustments_results.png)
+### Side-Note: Tensorboard Graphing
+In order to get TB to work, you first have to include `tensorboard_log=TRAINING_LOG_PATH` in the model. If you are using the setup that I'm using,
+```python
+TRAINING_LOG_PATH = f"./_training_logs/ppo_{env_name}_tensorboard/"
+```
+Once you have that, then in a different terminal from the one you are using for training the model you can run
+```shell
+tensorboard --logdir SpecRLBench/TRAINING_LOG_PATH/ # Make sure to put in the acutal path, not 'TRAINING_LOG_PATH'
+```
+And it will be put to http://localhost:6006/. You can open it in your browser, and it'll display the information present in the terminal
+<details>
+<summary>I.e.</summary><code>
+-----------------------------------------<br>
+| rollout/                |             |<br>
+|    ep_len_mean          | 1.51e+03    |<br>
+|    ep_rew_mean          | 2.3         |<br>
+| time/                   |             |<br>
+|    fps                  | 2341        |<br>
+|    iterations           | 62          |<br>
+|    time_elapsed         | 216         |<br>
+|    total_timesteps      | 507904      |<br>
+| train/                  |             |<br>
+|    approx_kl            | 0.030352127 |<br>
+|    clip_fraction        | 0.344       |<br>
+|    clip_range           | 0.2         |<br>
+|    entropy_loss         | -2.85       |<br>
+|    explained_variance   | 0.862       |<br>
+|    learning_rate        | 0.0001      |<br>
+|    loss                 | -0.0111     |<br>
+|    n_updates            | 238         |<br>
+|    policy_gradient_loss | 0.014       |<br>
+|    std                  | 1.01        |
+|    value_loss           | 0.00692     |<br>
+-----------------------------------------</code>
+</details>
+As graphs, and you can compare them over time (like I did)!
+## Goal Achieved Logic
+In the original environment, there was no "goal" that terminated the environment: This meant that a) I couldn't do a "time-alive decay" because it would punish all runs equally, which in turn b) made circling a viable policy. When I was reading the values tested the decay, it seemed as though it performed worse than the original non-decayed function:
+![](Images/decay_worse_than_non-decay.png)
+And, when testing, I found that despite the fact that it was supposed to work *better*, it actually worked *worse*, and even stayed in the same place at times (which was super confusing, since it was actively punished for that). \
+To create the goal logic, I look through all of the casualties and see if they're all rescued, and if so, then return `True` for all agents. This design choice was made because the SAR environment is inherently collaborative, and if all of the casualties aren't rescued, then the task cannot be considered complete.
+
+# 7-14-26
+Sparse reward likelihood directly correlated with complexity of environment
+ - Reward engineering dense rewards more complex as environment complexity increases
+`policy_updates = 100 < TOTAL_TIMESTEPS//(n_steps * n_envs)} < 1000`
+`n_steps>>max_episode_length`
+Larger `batch_size`, less noisy gradient
+1. Run training multiple times with visibility reward (sanity check for consistency in randomness between runs; curve should be identical)
+2. Fix randomness changes [optional]
+![](Images/reproducible_results_evidence.png)
+3. Run without visibility reward 3 x
+4. Run with different seeds N x
+[test](academic-obsidian-main/training_eval_results)
 
 --- 
 #project/idea 
