@@ -98,6 +98,17 @@
 	- [Reward Logic Migration](#reward-logic-migration)
 		- [Side-Note: Tensorboard Graphing](#side-note-tensorboard-graphing)
 - [7-14-26](#7-14-26)
+	- [Evaluation Changes](#evaluation-changes)
+		- [Evaluation Metrics](#evaluation-metrics)
+		- [Reproducibility](#reproducibility)
+		- [Miscellaneous](#miscellaneous)
+	- [Training Changes](#training-changes)
+		- [Hyperparameter Configurability](#hyperparameter-configurability)
+- [7-15-26](#7-15-26)
+	- [Entrapped Casualties Pivot](#entrapped-casualties-pivot)
+		- [Building Randomization](#building-randomization)
+	- [Wall Collision Punishment](#wall-collision-punishment)
+	- [Next Steps](#next-steps)
 
 # Sources
 ## ROS
@@ -857,6 +868,7 @@ By the end of the day, though, the PPO algorithm was behaving very similarly to 
 # 7-12-26
 Today, I was set on making the PPO algorithm work, at least with a single agent. I was able to get it to work:
 ![](Images/single_agent_ppo_policy_success.gif) 
+[https://youtu.be/In8nVy22jt8](https://youtu.be/In8nVy22jt8)
 # 7-13-26
 Since I made a lot of changes in order to get this to work and by the time it worked, I was extremely tired, I will be attempting to summarize them below. I also ran tests and variations on some of the parameters to see what would happen and document them.
 ## Faster Layout Resampling
@@ -939,17 +951,88 @@ And, when testing, I found that despite the fact that it was supposed to work *b
 To create the goal logic, I look through all of the casualties and see if they're all rescued, and if so, then return `True` for all agents. This design choice was made because the SAR environment is inherently collaborative, and if all of the casualties aren't rescued, then the task cannot be considered complete.
 
 # 7-14-26
+Today, I was trying to get the single agent surface casualties environment to work with a high success rate (>>85%), which I succeeded at with an extremely lucky seed. However, in order to even get to that point, there were many changes I made to improve both the model's hyperparameters and the evaluation  
+## Evaluation Changes
+### Evaluation Metrics
+At the beginning of the day, my evaluation metrics weren't very descriptive. All that was there was the mean reward, which doesn't tell me anything about the different variations that could present itself during the evaluation. \
+So, I captured average episode length, rescue rate, and rescue rates for when casualty was initially visible or not. This was much better for evaluations because it allowed me to understand whether it was the environment that was at fault or an issue with how my model was being trained. E.g. if there was a 50% success rate but 100% of times that it could see the casualty it rescued it, then the issue isn't the model but the environment.
+### Reproducibility
+Whenever I was seeing different results for training even when none of my hyperparameters had changed, Zijian mentioned that this was likely because there was randomization that I wasn't controlling through my seed. \
+To fix this, I had to adjust the `reset()` method of the wrapper. There, I had to use the following code:
+```python
+if seed is not None:
+	self._layout_seed = seed
+elif hasattr(self, "_layout_seed"):
+	self._layout_seed += 1
+	seed = self._layout_seed
+obs, info = super().reset(seed=seed, options=options)
+info['propositions'] = []
+info['casualty_visible'] = False
+self.prev_casualty_visible = False
+```
+Essentially, this code increments the seed every run so that each individuals environment sees a new environment every run, but there is also a large amount of overlap between environment training. I had tested `+=0`, which led to large amounts of overfitting, and `+=8`, which didn't actually change the model significantly. \
+Now that I had this, I was finally able to replicate the results of training exactly. Below is a screenshot from halfway through the training because otherwise, you wouldn't be able to see the difference between the two runs! 
+![](Images/reproducible_results_evidence.png)
+### Miscellaneous
+- Increased episodes from 20 to 50 so that sample size was much larger. Other changes I made today made that much more feasible.
+- Added progress bar using `tqdm` so that I know when evaluation runs are over. Very helpful when I was seedhunting and wanted to minimize logging.
+- Defaulted device to `cuda:1` to prevent memory sharing with James' VLLM. This was giving me a lot of trouble with speed (see Training Changes) but since it also impacted evaluation, I changed it here.
+- Reduced wall count from 20 to 10 since I was seeing negligible progress with the former 
+## Training Changes
+### Hyperparameter Configurability
+I added many different parameters that can be changed:
+- `ent_coef` - Doubled this value from 0.01 to 0.02 since the model was not exploring enough. In a sparse-reward environment, it is very important to continue exploring and additionally important since PPO needs rewards to improve its critic
+- `learning_rate` - Decreased from `1e-4` to `5e-5` to balance between learning fast and exploring before exploiting. This was important for the sparse env since majority of episodes would end without any reward
+- `n_steps` - `n_steps>>max_episode_length`; I changed to 2048 since `max_episode_length` was 1000
+- `batch_size` - I kept at `256` because other values were worse. Batch size smooths out the gradient, which creates a difficult balance for this env so that a bad sample doesn't impact the results too much but not be drowned out in a sea of 0-reward episodes
+- `n_epochs` - Decreasing the epochs can help prevent noise overfitting, but I kept at 10 because reducing it was causing the policy to be too noisy
+- `clip_range` - Tried adjusting this value, but I found that the policy wouldn't update otherwise
+- `target_kl` - Tried changing `target_kl` as well, but ultimately kept it at 0.03 because that was working the best \
+- `visibility_reward` - Not actually a hyperparameter, but I was testing with and without the additional sparse reward of casualty visibility to incentivize searching to even see the casualty \ 
+In total, I trained 56 models with varying parameters and success rates:
+![](Images/jul14_ppo_training_runs.png) \
+However, after improving the reproducibility, I was unable to reproduce the results of the 98% successful trial. On average, I was getting ~50% success, which wasn't horrible but also wasn't great. Below is a video (click the image) of that 98% successful policy:
+[![Video 2](https://img.youtube.com/vi/UufbdYSWAVE/hqdefault.jpg)](https://youtu.be/UufbdYSWAVE)
+<details>
+<summary>Raw Notes</summary>
 Sparse reward likelihood directly correlated with complexity of environment
  - Reward engineering dense rewards more complex as environment complexity increases
-`policy_updates = 100 < TOTAL_TIMESTEPS//(n_steps * n_envs)} < 1000`
+`policy_updates = 100 less than TOTAL_TIMESTEPS//(n_steps * n_envs)} less than 1000`
 `n_steps>>max_episode_length`
 Larger `batch_size`, less noisy gradient
 1. Run training multiple times with visibility reward (sanity check for consistency in randomness between runs; curve should be identical)
 2. Fix randomness changes [optional]
-![](Images/reproducible_results_evidence.png)
+
 3. Run without visibility reward 3 x
 4. Run with different seeds N x
-[test](academic-obsidian-main/training_eval_results)
+[Training Evaluation Results (outputs from ppo_load_env.py)](academic-obsidian-main/training_eval_results)
+</details>
+# 7-15-26
+## Entrapped Casualties Pivot
+Once I showed these results to Zijian, he recommended that I switch from a partially observed environment to a fully observed environment. Since I didn't want to compromise the SAR environment, I was able to pivot to entrapped casualties rather than surface casualties. Since the buildings are visible above the agent's line of sight (unlike the surface casualties), it would make sense that it has the lidar estimate of where it is. Moreover, this aligns more closely with the [literature](#Papers) because more than one paper has suggested the use of UAV-UGV collaboration, where UAVs map out the environment while UGVs actually interact with the environment (UAVs == drones, so can't interact much). I first had to switch the task so that it incorporated `entrapped_casualtys` in addition to `surface_casualtys`, as well as debug a bunch of issues with the buildings.
+### Building Randomization
+There were multiple issues with the randomization of the buildings and the building code in general. First off, the building would spawn in the same place every run, which I assumed would make the model overfit to that data. Moreover, I couldn't spawn more than one building at the same time, and the code made it difficult to work with and debug and I had a lot of issues trying to just get two buildings in the scene. Additionally, coordinating spawning the buildings, walls, and casualties was extremely difficult since I had to set their positions and rotations in different parts of the environment creation. Because this code was so complicated, I had AI help me with this portion. \
+However, what surprised me was that the model that was trained with only one building location was able to adapt to different building locations around the map, with 98% accuracy! I will look into what caused this, but I am guessing that because there was enough randomization of the rest of the environment, the agent learning how to pathfind instead of just "go to this position" every time, which is really cool to see (image clickable):
+[![Video 3](https://img.youtube.com/vi/R8GvCAOcREs/hqdefault.jpg)](https://youtu.be/R8GvCAOcREs)
+## Wall Collision Punishment
+Once I showed that the model could work with buildings, Zijian recommended me to punish the agent for colliding with any of the walls. This was a lot simpler to implement than the building code, because I had references from other geoms (e.g. gremlins, casualties) and the fact that the contact property is tracked by MuJoCo. Using the reward gates I've implemented for the visibility and entering buildings, I prevented punishments from recurring until the agent stops touching the wall. \
+Compared to the raw performance, this one was slightly worse, at 80% success, but considering I only trained one model on this new environment, I was quite happy with it! I hope to continue shaping this reward so that it's less extreme (it's not nearly as sparse as the final reward, so it should be treated as such).
+## Next Steps
+- Spawn in multiple buildings and have the agent explore both of them to find an entrapped casualty (1/N chance of spawning) >> Might need to increase `max_episode length`
+- Improve wall collision model performance while minimizing wall hits.
+<details>
+<summary>Raw Notes</summary>
+- Provide estimated position of agent (e.g. zone) as part of observation space
+- Give reward for entering that zone
+- Give reward for finding casualty
+---
+- cost for collisions to walls or terminate (test)
+- surface casualties 
+- multiple buildings, some have casualties
+</details>
+
+
+
 
 --- 
 #project/idea 
