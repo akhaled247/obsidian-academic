@@ -1007,6 +1007,7 @@ Larger `batch_size`, less noisy gradient
 4. Run with different seeds N x
 [Training Evaluation Results (outputs from ppo_load_env.py)](academic-obsidian-main/training_eval_results)
 </details>
+
 # 7-15-26
 ## Entrapped Casualties Pivot
 Once I showed these results to Zijian, he recommended that I switch from a partially observed environment to a fully observed environment. Since I didn't want to compromise the SAR environment, I was able to pivot to entrapped casualties rather than surface casualties. Since the buildings are visible above the agent's line of sight (unlike the surface casualties), it would make sense that it has the lidar estimate of where it is. Moreover, this aligns more closely with the [literature](#Papers) because more than one paper has suggested the use of UAV-UGV collaboration, where UAVs map out the environment while UGVs actually interact with the environment (UAVs == drones, so can't interact much). I first had to switch the task so that it incorporated `entrapped_casualtys` in addition to `surface_casualtys`, as well as debug a bunch of issues with the buildings.
@@ -1020,6 +1021,7 @@ Compared to the raw performance, this one was slightly worse, at 80% success, bu
 ## Next Steps
 - Spawn in multiple buildings and have the agent explore both of them to find an entrapped casualty (1/N chance of spawning) >> Might need to increase `max_episode length`
 - Improve wall collision model performance while minimizing wall hits.
+
 <details>
 <summary>Raw Notes</summary>
 - Provide estimated position of agent (e.g. zone) as part of observation space
@@ -1030,9 +1032,6 @@ Compared to the raw performance, this one was slightly worse, at 80% success, bu
 - surface casualties 
 - multiple buildings, some have casualties
 </details>
-
-
-
 
 --- 
 #project/idea 
