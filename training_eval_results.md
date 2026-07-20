@@ -19,7 +19,8 @@ ent_coef = 0.01
 n_steps = 4096  #512 Level0, 2048 Level4
 batch_size = 256
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#_models/ppo_20260714_1540_PointLTL4MASAR1-v0_run9
+_models/ppo_20260714_1540_PointLTL4MASAR1-v0_run9
+=====================================================
 Mean reward:        0.550 +/- 0.497
 Rescue rate:        11/20 (55.0%)
 s0-Vis rescue %:    11/18 (61.1%)
@@ -58,7 +59,7 @@ batch_size = 256
 n_epochs = 10
 clip_range = 0.2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# "_models/ppo_20260714_1623_PointLTL4MASAR1-v0_run9"
+_models/ppo_20260714_1623_PointLTL4MASAR1-v0_run9
 Mean reward:        1.980 +/- 0.140
 Rescue rate:        49/50 (98.0%)
 s0-Vis rescue %:    38/39 (97.4%)
@@ -66,7 +67,7 @@ s0-Invis rescue %:  11/11 (100.0%)
 Mean ep_len:        258.300 +/- 192.859
 Mean reward:        1.980 +/- 0.140
 -----------------------------------------------------
-# "_models/ppo_20260714_1652_PointLTL4MASAR1-v0_run9"
+_models/ppo_20260714_1652_PointLTL4MASAR1-v0_run9
 Mean reward:        1.560 +/- 0.753
 Rescue rate:        36/50 (72.0%)
 s0-Vis rescue %:    36/39 (92.3%)
@@ -75,7 +76,7 @@ Mean ep_len:        433.420 +/- 373.808
 Mean reward:        1.560 +/- 0.753
 =====================================================
 # Note: These next two runs I was testing absolute reproducability, which is why they're identical
-# "_models/ppo_20260714_2020_PointLTL4MASAR1-v0_run9"
+_models/ppo_20260714_2020_PointLTL4MASAR1-v0_run9
 Mean reward:        1.180 +/- 0.477
 Rescue rate:        11/50 (22.0%)
 s0-Vis rescue %:    11/39 (28.2%)
@@ -83,7 +84,7 @@ s0-Invis rescue %:  0/11 (0.0%)
 Mean ep_len:        851.840 +/- 287.426
 Mean reward:        1.180 +/- 0.477
 -----------------------------------------------------
-# "_models/ppo_20260714_2029_PointLTL4MASAR1-v0_run9"
+_models/ppo_20260714_2029_PointLTL4MASAR1-v0_run9
 Mean reward:        1.180 +/- 0.477
 Rescue rate:        11/50 (22.0%)
 s0-Vis rescue %:    11/39 (28.2%)
@@ -102,7 +103,7 @@ batch_size = 128
 n_epochs = 10
 clip_range = 0.2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# "_models/ppo_20260714_2103_PointLTL4MASAR1-v0"
+_models/ppo_20260714_2103_PointLTL4MASAR1-v0
 # with visibility reward
 Mean reward:        0.840 +/- 0.418
 Rescue rate:        1/50 (2.0%)
@@ -111,7 +112,7 @@ s0-Invis rescue %:  0/11 (0.0%)
 Mean ep_len:        999.200 +/- 5.600
 Mean reward:        0.840 +/- 0.418
 -----------------------------------------------------
-# "_models/ppo_20260714_2053_PointLTL4MASAR1-v0"
+_models/ppo_20260714_2053_PointLTL4MASAR1-v0
 # without visibility reward
 Mean reward:        0.100 +/- 0.300
 Rescue rate:        5/50 (10.0%)
@@ -120,7 +121,7 @@ s0-Invis rescue %:  0/11 (0.0%)
 Mean ep_len:        914.140 +/- 258.424
 Mean reward:        0.100 +/- 0.300
 -----------------------------------------------------
-# _models/ppo_20260714_2304_PointLTL4MASAR1-v0
+_models/ppo_20260714_2304_PointLTL4MASAR1-v0
 # dense distance based reward shaping
 Mean reward:        1.181 +/- 2.503
 Rescue rate:        32/50 (64.0%)
@@ -134,7 +135,7 @@ Mean reward:        1.181 +/- 2.503
 ```sh
 # Seedhunting
 
-saved model: _models/ppo_20260715_0729_PointLTL4MASAR1-v0.zip
+_models/ppo_20260715_0729_PointLTL4MASAR1-v0 # Seed 0
 ----------------------------------------
 Mean reward:        1.220 +/- 0.642
 Rescue rate:        17/50 (34.0%)
@@ -143,7 +144,7 @@ s0-Invis rescue %:  0/11 (0.0%)
 Mean ep_len:        783.820 +/- 337.644 
 Mean reward:        1.220 +/- 0.642
 
-saved model: _models/ppo_20260715_0729_PointLTL4MASAR1-v0.zip
+_models/ppo_20260715_0729_PointLTL4MASAR1-v0 # Seed 1
 ----------------------------------------
 Mean reward:        1.020 +/- 0.140
 Rescue rate:        1/50 (2.0%)
@@ -152,7 +153,7 @@ s0-Invis rescue %:  0/11 (0.0%)
 Mean ep_len:        982.460 +/- 122.780 
 Mean reward:        1.020 +/- 0.140
 
-saved model: _models/ppo_20260715_0729_PointLTL4MASAR1-v0.zip
+_models/ppo_20260715_0729_PointLTL4MASAR1-v0 # Seed 2
 ----------------------------------------
 Mean reward:        1.400 +/- 0.600
 Rescue rate:        23/50 (46.0%)
@@ -161,7 +162,7 @@ s0-Invis rescue %:  5/11 (45.5%)
 Mean ep_len:        692.720 +/- 379.782 
 Mean reward:        1.400 +/- 0.600
 
-saved model: _models/ppo_20260715_0729_PointLTL4MASAR1-v0.zip
+_models/ppo_20260715_0729_PointLTL4MASAR1-v0 # Seed 3
 ----------------------------------------
 Mean reward:        1.040 +/- 0.564
 Rescue rate:        9/50 (18.0%)
@@ -170,7 +171,7 @@ s0-Invis rescue %:  1/11 (9.1%)
 Mean ep_len:        845.980 +/- 330.296 
 Mean reward:        1.040 +/- 0.564
 
-saved model: _models/ppo_20260715_0832_PointLTL4MASAR1-v0.zip
+_models/ppo_20260715_0832_PointLTL4MASAR1-v0 # Seed 4
 ----------------------------------------
 Mean reward:        0.940 +/- 0.237
 Rescue rate:        0/50 (0.0%)
@@ -180,10 +181,11 @@ Mean ep_len:        1000.000 +/- 0.000
 Mean reward:        0.940 +/- 0.237
 ```
 
-# Entrapped Casualties(reward ∈ {0, 1})
+# Entrapped Casualties (reward ∈ {0, 1})
 ```sh
-# _models/ppo_20260715_1124_PointLTL5MASAR1-v0_0.zip
 # Note: Trained on building in the same location, but eval had buildings in random location (bug fixed after training)
+_models/ppo_20260715_1124_PointLTL5MASAR1-v0_0
+========================================
 Mean reward:        1.000 +/- 0.200
 Rescue rate:        49/50 (98.0%)
 Mean ep_len:        262.340 +/- 133.052
@@ -191,15 +193,149 @@ Mean ep_len:        262.340 +/- 133.052
 Mean reward:        0.900 +/- 0.361
 Rescue rate:        44/50 (88.0%)
 Mean ep_len:        424.780 +/- 250.803
+
+_models/ppo_20260717_1419_PointLTL4MASAR1-v0_0
+========================================
+Mean reward:        0.960 +/- 0.196
+Rescue rate:        48/50 (96.0%)
+Mean ep_len:        209.420 +/- 194.717
 ```
 
-`_models/ppo_20260715_1623_PointLTL5MASAR1-v0_0.zip
--1 reward for collision with wall
+# Multiple Buildings
+```sh
+# Disregard building lidar after it's been entered
+_models/ppo_20260716_2118_PointLTL6MASAR1-v0_0
+========================================
+Mean reward:        1.630 +/- 0.508
+Rescue rate:        46/50 (92.0%)
+Mean ep_len:        664.380 +/- 656.094
+```
+# Wall Collision Tests
+```sh
+_models/ppo_20260715_1623_PointLTL5MASAR1-v0_0
+# -1 reward for collision with wall
 Mean reward:        0.680 +/- 0.614
 Rescue rate:        41/50 (82.0%)
 Mean ep_len:        370.940 +/- 297.217
 
+_models/ppo_20260716_1342_PointLTL5MASAR1-v0_0
+# Termination when hitting wall
+========================================
+Mean reward:        0.260 +/- 0.450
+Rescue rate:        12/50 (24.0%)
+Mean ep_len:        2003.820 +/- 896.217
+--------------------------------
+# Observation-based wall collisions
+_models/ppo_20260716_2350_PointLTL5MASAR1-v0_0
+========================================
+Mean reward:        1.760 +/- 0.650
+Rescue rate:        44/50 (88.0%)
+Mean ep_len:        219.400 +/- 52.605
+--------------------------------
+_models/ppo_20260716_2350_PointLTL6MASAR1-v0_0
+========================================
+Mean reward:        0.780 +/- 0.708
+Rescue rate:        18/50 (36.0%)
+Mean ep_len:        892.300 +/- 979.976
+```
+## Gremlin-Based Collision Detection
+```sh
+_models/ppo_20260717_1312_PointLTL4MASAR1WC-v0_0
+========================================
+Mean reward:        0.920 +/- 0.271
+Rescue rate:        46/50 (92.0%)
+Mean ep_len:        201.540 +/- 181.446
+--------------------------------
+_models/ppo_20260717_0905_PointLTL5MASAR1-v0_0
+========================================
+Mean reward:        0.620 +/- 0.485
+Rescue rate:        31/50 (62.0%)
+Mean ep_len:        182.480 +/- 52.410
 
+_models/rnd_ppo_L5_S2_20260717_1109_PointLTL5MASAR1WC-v0_0
+========================================
+Mean reward:        0.660 +/- 0.474
+Rescue rate:        33/50 (66.0%)
+Mean ep_len:        191.980 +/- 60.951
+--------------------------------
+_models/rnd_ppo_L6_S2_20260717_0906_PointLTL6MASAR1-v0_0
+========================================
+Mean reward:        0.440 +/- 0.496
+Rescue rate:        22/50 (44.0%)
+Mean ep_len:        290.480 +/- 302.739
 
+_models/ppo_20260717_0906_PointLTL6MASAR1-v0_0
+========================================
+Mean reward:        0.000 +/- 0.000
+Rescue rate:        0/50 (0.0%)
+Mean ep_len:        2487.240 +/- 89.320
+```
+# RND
+```sh
+# First test using RND on surface casualty env
+_models/rnd_ppo_L4_S2_20260716_1511_PointLTL4MASAR1-v0_0
+Mean reward:        0.960 +/- 0.196
+Rescue rate:        48/50 (96.0%)
+Mean ep_len:        249.760 +/- 238.361
+----------------------------------------
+# RND on entrapped building environment (no disregard)
+_models/rnd_ppo_L5_S2_20260716_1639_PointLTL5MASAR1-v0_0
+========================================
+Mean reward:        0.600 +/- 0.529
+Rescue rate:        29/50 (58.0%)
+Mean ep_len:        1286.540 +/- 1066.874
+-----------------------------------------
+# Observation-based wall collisions
+_models/rnd_ppo_L6_S2_20260716_2349_PointLTL6MASAR1-v0_0
+========================================
+Mean reward:        1.400 +/- 0.648
+Rescue rate:        40/50 (80.0%)
+Mean ep_len:        411.760 +/- 383.412
+
+_models/rnd_ppo_L6_S2_20260719_1936_PointLTL6MASAR1-v0_0
+========================================
+Mean reward:        0.900 +/- 0.300
+Rescue rate:        45/50 (90.0%)
+Mean ep_len:        728.240 +/- 779.803
+
+```
+# Lagrangian
+```shell
+_models/ppo_lag_L4_S0_20260717_2248_PointLTL4MASAR1WC-v0_0
+========================================
+Mean reward:        0.940 +/- 0.237
+Rescue rate:        47/50 (94.0%)
+Mean ep_len:        184.220 +/- 100.788
+-----------------------------------------
+
+_models/ppo_lag_L5_S0_20260717_2332_PointLTL5MASAR1WC-v0_0
+========================================
+Mean reward:        0.500 +/- 0.500
+Rescue rate:        25/50 (50.0%)
+Mean ep_len:        206.280 +/- 92.236
+
+# After switching to sb3-style updates (~640 vs 20)
+
+_models/ppo_lag_L5_S1_20260719_1341_PointLTL5MASAR1WC-v0_0
+# S0
+========================================
+Mean reward:        0.720 +/- 0.449
+Rescue rate:        36/50 (72.0%)
+Mean ep_len:        216.100 +/- 89.889
+
+_models/ppo_lag_L5_S0_20260719_1939_PointLTL5MASAR1WC-v0_0
+# S0
+========================================
+Mean reward:        0.740 +/- 0.439
+Rescue rate:        37/50 (74.0%)
+Mean ep_len:        208.300 +/- 66.244
+
+_models/ppo_lag_L5_S1_20260719_2112_PointLTL5MASAR1WC-v0_0
+# S1
+========================================
+Mean reward:        0.720 +/- 0.449
+Rescue rate:        36/50 (72.0%)
+Mean ep_len:        369.820 +/- 292.297
+```
 --- 
 #project/idea

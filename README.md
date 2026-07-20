@@ -685,10 +685,17 @@ for episode in range(episodes):
 And when it displayed the model running autonomously in the human view, the training had worked! This was really cool to me and made me excited to start trying it out. \
 ## Literature Review
 When I tried it, though, I realized that I needed to do a lot to actually make it work. For one, I didn't actually know what model to use for this process. I knew that I would need a PPO (which is why I chose this), but beyond that, I didn't know what, how, or why PPO. I wanted to conduct a literature review of what PPO is and what is currently being used by similar setups to my own in prior research.
+## Papers
+[Original PPO Paper](https://arxiv.org/pdf/1707.06347)
+[LSTS](https://arxiv.org/pdf/2402.03678)
+[UAV-UGV Collaboration with MAPPO](https://arxiv.org/abs/2401.01481)
+[Game-Based Usage of IPPO](https://arxiv.org/pdf/2011.09533)
+[Awesome Paper Explaining PPO From Scratch](https://fse.studenttheses.ub.rug.nl/25709/1/mAI_2021_BickD.pdf)
+[Navigation Using PPO in FObs Env](https://github.com/hamidthri/navbot_ppo)
 ### Learning About PPO
 *To learn what PPO was, I used the [Arxiv Insights](https://www.youtube.com/watch?v=5P7I-xPq8u8) channel recommended on the Stable Baselines documentation page for PPO as a reference.*
 - RL relies on training data that is self-generated using the environment, which in of and itself is based on the policy that is trained by the data
-- Distributions of observations and rwards are changing, causing instability
+- Distributions of observations and rewards are changing, causing instability
 - High sensitivity to hyperparameters
 - Balance between simplicity in code, tuning, sampling
 - Online learning >> learns directly from environment encounters
@@ -880,6 +887,7 @@ In `SpecRLBench/specbench/envs/zones/safety-gymnasium/safety_gymnasium/tasks/saf
 ## Separate Train/Load Scripts
 I was quite annoyed with having to comment out parts of the code to have training and loading work in the same script, so I just split them into individual scripts, which made it a lot easier to work on the training portion.
 ## Hyperparameter Changes
+[RL Baselines3 Zoo - Potentially Simplify Training Process](https://rl-baselines3-zoo.readthedocs.io/en/master/) - [GitHub Repo](https://github.com/DLR-RM/rl-baselines3-zoo/tree/master)
 There were quite a few hyperparameters that I changed to improve model performance. A snippet of the final model creation code is shown below:
 ```python
 model = PPO(
@@ -1018,6 +1026,12 @@ However, what surprised me was that the model that was trained with only one bui
 ## Wall Collision Punishment
 Once I showed that the model could work with buildings, Zijian recommended me to punish the agent for colliding with any of the walls. This was a lot simpler to implement than the building code, because I had references from other geoms (e.g. gremlins, casualties) and the fact that the contact property is tracked by MuJoCo. Using the reward gates I've implemented for the visibility and entering buildings, I prevented punishments from recurring until the agent stops touching the wall. \
 Compared to the raw performance, this one was slightly worse, at 80% success, but considering I only trained one model on this new environment, I was quite happy with it! I hope to continue shaping this reward so that it's less extreme (it's not nearly as sparse as the final reward, so it should be treated as such).
+## Code Testing
+I asked AI to create tests for the code so that if changes are made, I can check what issues there are and debug them more easily using:
+```bash
+cd SpecBenchRL
+python -m pytest specbench/envs/zones/safety-gymnasium/tests/test_specrlbench_sar_contracts.py -q
+```
 ## Next Steps
 - Spawn in multiple buildings and have the agent explore both of them to find an entrapped casualty (1/N chance of spawning) >> Might need to increase `max_episode length`
 - Improve wall collision model performance while minimizing wall hits.
@@ -1032,6 +1046,44 @@ Compared to the raw performance, this one was slightly worse, at 80% success, bu
 - surface casualties 
 - multiple buildings, some have casualties
 </details>
+
+# 7-16-26
+## Meeting with Dr. Li
+- Reward machines/state machines with rewards
+- PPO with Safety/Reachability constraints
+- **Exploration-driven heuristics or intrinsic reward >> Small ++ when new observation seen**
+## Intrinsic Rewards
+[First-Explore PPO - Learning Meta-Exploration with Proximal Policy Optimization](https://openreview.net/pdf?id=lcIJ8svFXr)
+[Proximal Policy Optimization via Enhanced Exploration Efficiency](https://arxiv.org/pdf/2011.05525)
+[Intrinsic Reward Policy Optimization for Sparse-Reward Environments](https://arxiv.org/pdf/2601.21391v1)
+[Exploration by Random Reward Perturbation](https://arxiv.org/pdf/2506.08737v1)
+[Curiosity-driven Exploration by Self-supervised Prediction (ICM)](https://arxiv.org/pdf/1705.05363)
+- [PPO and ICM GitHub Implementation](https://github.com/bonniesjli/icm#ppoicm)
+- [Official Impl](https://github.com/pathak22/noreward-rl)
+[Large-Scale Study of Curiosity-Driven Learning](https://arxiv.org/pdf/1808.04355)
+[EXPLORATION BY RANDOM NETWORK DISTILLATION](https://arxiv.org/pdf/1810.12894)
+- [Practical Impl](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo_rnd_envpool.py)
+- Leave RND for now; first, ~~work on terminating when colliding with walls~~ with one building. then, ~~add cost for exiting and re-entering a building to punish repeated detections~~
+## Ignore Building After Entry
+[![Video 3](https://img.youtube.com/vi/EWgiY4UBIAI/hqdefault.jpg)](https://youtu.be/EWgiY4UBIAI)
+
+# 7-17-26
+Safety Constraints
+- Lagrangian PPO
+	- MinMax policy with lagragian
+	- OmniSafe (X)
+- CBF - Control Barrier Function
+	- Model cost using CBF
+- Hamilton-Jacobian Reachability Analysis
+	- Model safety constraints >> Maximize reward such that cost is below threshold N
+```sh
+Traceback (most recent call last):
+  File "/home/akhaled/RISE-2026/SpecRLBench/debug_env.py", line 24, in <module>
+    obs, reward, terminated, truncated, info = env.step(action)
+ValueError: too many values to unpack (expected 5)
+```
+Means that environment not set with safety wrapper.
+
 
 --- 
 #project/idea 
