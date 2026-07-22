@@ -2,7 +2,7 @@
 aliases:
   - PPO
 hasTopic:
-  - "[[Arxiv Insights - PPO]]"
+  - "[Arxiv Insights - PPO](Arxiv%20Insights%20-%20PPO.md)"
   - "[[SpecRLBench]]"
   - "[[Algorithm]]"
   - "[[RL]]"

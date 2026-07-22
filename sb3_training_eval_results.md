@@ -299,8 +299,65 @@ Rescue rate:        45/50 (90.0%)
 Mean ep_len:        728.240 +/- 779.803
 
 ```
-# Lagrangian
+
+# PPO
+```sh
+_models/ppo_20260720_1838_PointLTL0MASAR1-v0_0
+========================================
+Rescue rate: 50/50 (100.0%)
+Mean ep_len: 198.420 +/- 83.106
+
+_models/ppo_20260720_1838_PointLTL4MASAR1-v0_1
+========================================
+Rescue rate: 49/50 (98.0%)
+Mean ep_len: 194.300 +/- 159.937
+
+_models/ppo_20260721_0811_PointLTL4MASAR1WC-v0_0
+========================================
+Mean reward: 0.860 +/- 0.347
+Rescue rate: 43/50 (86.0%)
+Mean ep_len: 181.660 +/- 141.758
+
+_models/ppo_20260720_1838_PointLTL5MASAR1-v0_3
+========================================
+Rescue rate: 49/50 (98.0%)
+Mean ep_len: 258.240 +/- 129.260
+
+_models/ppo_20260721_1233_PointLTL5MASAR1WC-v0_0
+# PPO_t20260721_1233_st4096_bs256_tt4.0M_ec0.02_lr5e-05_ep10_cr0.2_kl0.05_γ0.99_λ0.95_s0
+========================================
+Mean reward: 0.680 +/- 0.466
+Rescue rate: 34/50 (68.0%)
+Mean ep_len: 194.780 +/- 49.972
+_models/ppo_20260720_1838_PointLTL6MASAR1-v0_4
+========================================
+Mean reward: 0.900 +/- 0.300
+Rescue rate: 45/50 (90.0%)
+Mean ep_len: 650.800 +/- 705.477
+------------------------------------------------------
+
+_models/ppo_20260720_1644_PointLTL6MASAR1-v0_0
+# gamma=0.995, gae_lambda=0.98
+========================================
+Mean reward: 0.940 +/- 0.237
+Rescue rate: 47/50 (94.0%)
+Mean ep_len: 637.820 +/- 572.917
+
+_models/sac_20260720_1505_PointLTL4MASAR1-v0_0
+========================================
+Mean reward: 0.440 +/- 0.496
+Rescue rate: 22/50 (44.0%)
+Mean ep_len: 608.280 +/- 443.203
+```
+# PPO Lagrangian
 ```shell
+_models/ppo_lag_20260721_0809_PointLTL4MASAR1WC-v0_0
+========================================
+Mean reward: 0.800 +/- 0.400
+Rescue rate: 40/50 (80.0%)
+Mean ep_len: 193.800 +/- 184.005
+
+-----------------------------------------
 _models/ppo_lag_L4_S0_20260717_2248_PointLTL4MASAR1WC-v0_0
 ========================================
 Mean reward:        0.940 +/- 0.237
@@ -336,6 +393,95 @@ _models/ppo_lag_L5_S1_20260719_2112_PointLTL5MASAR1WC-v0_0
 Mean reward:        0.720 +/- 0.449
 Rescue rate:        36/50 (72.0%)
 Mean ep_len:        369.820 +/- 292.297
+
+_models/ppo_lag_20260720_1602_PointLTL6MASAR1WC-v0_0
+========================================
+Mean reward: 0.120 +/- 0.325
+Rescue rate: 6/50 (12.0%)
+Mean ep_len: 778.560 +/- 311.987
 ```
+# TRPO
+```sh
+_models/trpo_20260720_1256_PointLTL0MASAR1-v0_0
+========================================
+Mean reward: 1.000 +/- 0.000
+Rescue rate: 50/50 (100.0%)
+Mean ep_len: 189.040 +/- 77.015
+
+_models/trpo_20260720_1328_PointLTL4MASAR1-v0_0
+========================================
+Mean reward: 0.960 +/- 0.196
+Rescue rate: 48/50 (96.0%)
+Mean ep_len: 215.840 +/- 198.322
+
+_models/trpo_20260721_0810_PointLTL4MASAR1WC-v0_0
+========================================
+Mean reward: 0.880 +/- 0.325
+Rescue rate: 44/50 (88.0%)
+Mean ep_len: 202.800 +/- 163.613
+
+_models/trpo_20260720_1328_PointLTL5MASAR1-v0_2
+========================================
+Mean reward: 0.980 +/- 0.140
+Rescue rate: 49/50 (98.0%)
+Mean ep_len: 256.300 +/- 120.162
+
+_models/trpo_20260721_0810_PointLTL5MASAR1WC-v0_0
+========================================
+Mean reward: 0.780 +/- 0.414
+Rescue rate: 39/50 (78.0%)
+Mean ep_len: 228.660 +/- 57.095
+
+_models/trpo_20260720_1328_PointLTL6MASAR1-v0_3
+========================================
+Mean reward: 0.920 +/- 0.271
+Rescue rate: 46/50 (92.0%)
+Mean ep_len: 556.540 +/- 608.140
+
+_models/trpo_20260721_0810_PointLTL6MASAR1WC-v0_0
+========================================
+Mean reward: 0.520 +/- 0.500
+Rescue rate: 26/50 (52.0%)
+Mean ep_len: 467.320 +/- 653.646
+```
+
+# TRPO Lagrangian
+```sh
+_models/trpo_lag_20260721_0811_PointLTL4MASAR1WC-v0_0
+========================================
+Mean reward: 0.840 +/- 0.367
+Rescue rate: 42/50 (84.0%)
+Mean ep_len: 238.120 +/- 225.010
+
+_models/trpo_lag_20260721_0811_PointLTL5MASAR1WC-v0_0
+========================================
+Mean reward: 0.540 +/- 0.498
+Rescue rate: 27/50 (54.0%)
+Mean ep_len: 338.180 +/- 259.823
+
+_models/trpo_lag_20260720_2100_PointLTL6MASAR1WC-v0_2
+========================================
+Mean reward: 0.180 +/- 0.384
+Rescue rate: 9/50 (18.0%)
+Mean ep_len: 1817.900 +/- 975.505
+```
+# SAC
+```sh
+_models/sac_20260720_1414_PointLTL0MASAR1-v0_0
+# 4 envs, 8/8
+========================================
+Mean reward: 0.980 +/- 0.140
+Rescue rate: 49/50 (98.0%)
+Mean ep_len: 196.040 +/- 137.233
+
+_models/sac_20260720_2253_PointLTL4MASAR1-v0_0
+# 8 envs, 1/1
+========================================
+Mean reward: 0.740 +/- 0.439
+Rescue rate: 37/50 (74.0%)
+Mean ep_len: 362.900 +/- 381.330
+```
+---
+
 --- 
 #project/idea

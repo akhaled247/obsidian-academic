@@ -4,7 +4,6 @@
 	#rise-dcl-log
 </details> 
 
-# Table of Contents
 - [Sources](#sources)
 	- [ROS](#ros)
 	- [SpecRLBench](#specrlbench)
@@ -70,6 +69,7 @@
 	- [Remote Desktop Setup](#remote-desktop-setup)
 	- [PPO Setup](#ppo-setup)
 	- [Literature Review](#literature-review)
+	- [Papers](#papers)
 		- [Learning About PPO](#learning-about-ppo)
 		- [PPO Variations](#ppo-variations)
 - [07-09-26](#07-09-26)
@@ -108,7 +108,17 @@
 	- [Entrapped Casualties Pivot](#entrapped-casualties-pivot)
 		- [Building Randomization](#building-randomization)
 	- [Wall Collision Punishment](#wall-collision-punishment)
+	- [Code Testing](#code-testing)
 	- [Next Steps](#next-steps)
+- [7-16-26](#7-16-26)
+	- [Meeting with Dr. Li](#meeting-with-dr-li)
+	- [Intrinsic Rewards](#intrinsic-rewards)
+	- [Random Network Distillation](#random-network-distillation)
+		- [SB3 Integration](#sb3-integration)
+	- [Ignore Building After Entry](#ignore-building-after-entry)
+- [7-17-26](#7-17-26)
+- [07-20-26](#07-20-26)
+- [07-21-26](#07-21-26)
 
 # Sources
 ## ROS
@@ -167,6 +177,13 @@
 - ~~Migrate `BURISE-2026` personal repo to `BU-DEPEND-Lab`~~
 - ~~Debug new level system~~
 - ~~Format `action`, `obs`, `info` space so that it works with PPO vis  ~~
+- Leave RND for now; first, ~~work on terminating when colliding with walls~~ with one building. then, ~~add cost for exiting and re-entering a building to punish repeated detections~~
+- ~~Provide estimated position of agent (e.g. zone) as part of observation space~~
+- ~~Give reward for entering that zone~~
+- ~~Give reward for finding casualty~~
+- ~~cost for collisions to walls or terminate (test)~~
+- ~~surface casualties ~~
+- ~~multiple buildings, some have casualties~~
 - LLM where we specify agent and casualties and explain what to avoid etc. and have LLM generate high level plan, call low level controller (A*, something else)
 
 # 06-29-26
@@ -805,7 +822,7 @@ and return it to the model if SB3 is enabled.
 The first time I ran it though, even with 1000 timesteps, it was taking 20+ minutes. The output was also not good: the model still seemed to be moving completely randomly. After looking into the code, I saw that the `terminated` and `truncated` values were dictionaries with the values, which would automatically return `True` every step of the episode. This didn't impact `debug_env.py` since it was running the MA-compatible Gym API, but it meant that I had to `any(list(Dict.values()))` for both of them. \
 In a similar vein, the rewards were in a Dict object, which isn't compatible with what PPO believes is a single agent environment. I just summed the rewards to get one "big" reward, but I might see what happens if I average them instead (TBD).
 ## PPO Reward Engineering
-There was a lot of tweaking I did to get a model I was ~70% happy with, so I'm going to summarize what I did:
+There was a lot of tweaking I did to get a model I was ~`70%`happy with, so I'm going to summarize what I did:
 - Eliminated the `lidar_conf.max_dist` by setting it to `None`, so that the agents could observe more of the environment.
 - Made finding the casualties a one-time reward rather than a continuous one. When thinking about the task, that does make sense as well, since staying next to a casualty doesn't make them any better.
 - Made the environment walls collidable and removed the termination when they were hit (but kept the penalty)
@@ -870,17 +887,17 @@ On request from Dr. Li, James and I made status reports describing the activitie
 ![](Images/w1_2_status_report_p2.png)
 ## EOD
 By the end of the day, though, the PPO algorithm was behaving very similarly to how it was initially, and I didn't see much improvement in performance. I wanted to make it work with one agent by the end of the weekend.
-# 7-11-26
+# 07-11-26
 
-# 7-12-26
+# 07-12-26
 Today, I was set on making the PPO algorithm work, at least with a single agent. I was able to get it to work:
 ![](Images/single_agent_ppo_policy_success.gif) 
 [https://youtu.be/In8nVy22jt8](https://youtu.be/In8nVy22jt8)
-# 7-13-26
+# 07-13-26
 Since I made a lot of changes in order to get this to work and by the time it worked, I was extremely tired, I will be attempting to summarize them below. I also ran tests and variations on some of the parameters to see what would happen and document them.
 ## Faster Layout Resampling
 Whenever I was training the model, I found that every time it had to reset, it was taking an unusually long amount of time. According to the progress bar provided by the SB3 API, it was running 9 iterations per second, which (across 500k steps) was projected to take 88 hours, which was just not feasible. \
-Looking through the code, it appeared that the entire world was being regenerated every time a new episode started, which was not necessary: the majority of the components were carried over between runs, and all that needed to be changed was the locations of the obstacles/agents to prevent overfitting. With this new `_fast_resample_layout()` method, I can simply regenerate the poses of the different objects in the environment without rebuilding their entire files from zero. Now, the ETA is ~3-4 minutes, which is ~80% faster than it was even when doing full `len=1000` episodes. \
+Looking through the code, it appeared that the entire world was being regenerated every time a new episode started, which was not necessary: the majority of the components were carried over between runs, and all that needed to be changed was the locations of the obstacles/agents to prevent overfitting. With this new `_fast_resample_layout()` method, I can simply regenerate the poses of the different objects in the environment without rebuilding their entire files from zero. Now, the ETA is ~3-4 minutes, which is ~`80%`faster than it was even when doing full `len=1000` episodes. \
 As part of this as well, I switched from the default `DummyVecEnv` to a `SubprocVecEnv` because it is the [default](https://stable-baselines3.readthedocs.io/en/master/guide/vec_envs.html#subprocvecenv) for complex environments that the user wants to run in parallel.
 ## Per-Agent Tracking Cameras
 In `SpecRLBench/specbench/envs/zones/safety-gymnasium/safety_gymnasium/tasks/safe_multi_agent/world.py`, there was hardcoded multi-agent camera creation that only worked if there was agent 0 and agent 1. I changed it so how other parts of the multi_agent workspace function such that the number of new cameras is based on `self._agent.agent_num`. 
@@ -958,12 +975,12 @@ In the original environment, there was no "goal" that terminated the environment
 And, when testing, I found that despite the fact that it was supposed to work *better*, it actually worked *worse*, and even stayed in the same place at times (which was super confusing, since it was actively punished for that). \
 To create the goal logic, I look through all of the casualties and see if they're all rescued, and if so, then return `True` for all agents. This design choice was made because the SAR environment is inherently collaborative, and if all of the casualties aren't rescued, then the task cannot be considered complete.
 
-# 7-14-26
+# 07-14-26
 Today, I was trying to get the single agent surface casualties environment to work with a high success rate (>>85%), which I succeeded at with an extremely lucky seed. However, in order to even get to that point, there were many changes I made to improve both the model's hyperparameters and the evaluation  
 ## Evaluation Changes
 ### Evaluation Metrics
 At the beginning of the day, my evaluation metrics weren't very descriptive. All that was there was the mean reward, which doesn't tell me anything about the different variations that could present itself during the evaluation. \
-So, I captured average episode length, rescue rate, and rescue rates for when casualty was initially visible or not. This was much better for evaluations because it allowed me to understand whether it was the environment that was at fault or an issue with how my model was being trained. E.g. if there was a 50% success rate but 100% of times that it could see the casualty it rescued it, then the issue isn't the model but the environment.
+So, I captured average episode length, rescue rate, and rescue rates for when casualty was initially visible or not. This was much better for evaluations because it allowed me to understand whether it was the environment that was at fault or an issue with how my model was being trained. E.g. if there was a `50%`success rate but `100%`of times that it could see the casualty it rescued it, then the issue isn't the model but the environment.
 ### Reproducibility
 Whenever I was seeing different results for training even when none of my hyperparameters had changed, Zijian mentioned that this was likely because there was randomization that I wasn't controlling through my seed. \
 To fix this, I had to adjust the `reset()` method of the wrapper. There, I had to use the following code:
@@ -999,7 +1016,7 @@ I added many different parameters that can be changed:
 - `visibility_reward` - Not actually a hyperparameter, but I was testing with and without the additional sparse reward of casualty visibility to incentivize searching to even see the casualty \ 
 In total, I trained 56 models with varying parameters and success rates:
 ![](Images/jul14_ppo_training_runs.png) \
-However, after improving the reproducibility, I was unable to reproduce the results of the 98% successful trial. On average, I was getting ~50% success, which wasn't horrible but also wasn't great. Below is a video (click the image) of that 98% successful policy:
+However, after improving the reproducibility, I was unable to reproduce the results of the `98%`successful trial. On average, I was getting ~`50%`success, which wasn't horrible but also wasn't great. Below is a video (click the image) of that `98%`successful policy:
 [![Video 2](https://img.youtube.com/vi/UufbdYSWAVE/hqdefault.jpg)](https://youtu.be/UufbdYSWAVE)
 <details>
 <summary>Raw Notes</summary>
@@ -1013,19 +1030,19 @@ Larger `batch_size`, less noisy gradient
 
 3. Run without visibility reward 3 x
 4. Run with different seeds N x
-[Training Evaluation Results (outputs from ppo_load_env.py)](academic-obsidian-main/training_eval_results)
+[Training Evaluation Results (outputs from ppo_load_env.py)](sb3_training_eval_results.md)
 </details>
 
-# 7-15-26
+# 07-15-26
 ## Entrapped Casualties Pivot
 Once I showed these results to Zijian, he recommended that I switch from a partially observed environment to a fully observed environment. Since I didn't want to compromise the SAR environment, I was able to pivot to entrapped casualties rather than surface casualties. Since the buildings are visible above the agent's line of sight (unlike the surface casualties), it would make sense that it has the lidar estimate of where it is. Moreover, this aligns more closely with the [literature](#Papers) because more than one paper has suggested the use of UAV-UGV collaboration, where UAVs map out the environment while UGVs actually interact with the environment (UAVs == drones, so can't interact much). I first had to switch the task so that it incorporated `entrapped_casualtys` in addition to `surface_casualtys`, as well as debug a bunch of issues with the buildings.
 ### Building Randomization
 There were multiple issues with the randomization of the buildings and the building code in general. First off, the building would spawn in the same place every run, which I assumed would make the model overfit to that data. Moreover, I couldn't spawn more than one building at the same time, and the code made it difficult to work with and debug and I had a lot of issues trying to just get two buildings in the scene. Additionally, coordinating spawning the buildings, walls, and casualties was extremely difficult since I had to set their positions and rotations in different parts of the environment creation. Because this code was so complicated, I had AI help me with this portion. \
-However, what surprised me was that the model that was trained with only one building location was able to adapt to different building locations around the map, with 98% accuracy! I will look into what caused this, but I am guessing that because there was enough randomization of the rest of the environment, the agent learning how to pathfind instead of just "go to this position" every time, which is really cool to see (image clickable):
+However, what surprised me was that the model that was trained with only one building location was able to adapt to different building locations around the map, with `98%`accuracy! I will look into what caused this, but I am guessing that because there was enough randomization of the rest of the environment, the agent learning how to pathfind instead of just "go to this position" every time, which is really cool to see (image clickable):
 [![Video 3](https://img.youtube.com/vi/R8GvCAOcREs/hqdefault.jpg)](https://youtu.be/R8GvCAOcREs)
 ## Wall Collision Punishment
 Once I showed that the model could work with buildings, Zijian recommended me to punish the agent for colliding with any of the walls. This was a lot simpler to implement than the building code, because I had references from other geoms (e.g. gremlins, casualties) and the fact that the contact property is tracked by MuJoCo. Using the reward gates I've implemented for the visibility and entering buildings, I prevented punishments from recurring until the agent stops touching the wall. \
-Compared to the raw performance, this one was slightly worse, at 80% success, but considering I only trained one model on this new environment, I was quite happy with it! I hope to continue shaping this reward so that it's less extreme (it's not nearly as sparse as the final reward, so it should be treated as such).
+Compared to the raw performance, this one was slightly worse, at `80%`success, but considering I only trained one model on this new environment, I was quite happy with it! I hope to continue shaping this reward so that it's less extreme (it's not nearly as sparse as the final reward, so it should be treated as such).
 ## Code Testing
 I asked AI to create tests for the code so that if changes are made, I can check what issues there are and debug them more easily using:
 ```bash
@@ -1047,35 +1064,57 @@ python -m pytest specbench/envs/zones/safety-gymnasium/tests/test_specrlbench_sa
 - multiple buildings, some have casualties
 </details>
 
-# 7-16-26
+# 07-16-26
 ## Meeting with Dr. Li
 - Reward machines/state machines with rewards
 - PPO with Safety/Reachability constraints
 - **Exploration-driven heuristics or intrinsic reward >> Small ++ when new observation seen**
 ## Intrinsic Rewards
-[First-Explore PPO - Learning Meta-Exploration with Proximal Policy Optimization](https://openreview.net/pdf?id=lcIJ8svFXr)
-[Proximal Policy Optimization via Enhanced Exploration Efficiency](https://arxiv.org/pdf/2011.05525)
-[Intrinsic Reward Policy Optimization for Sparse-Reward Environments](https://arxiv.org/pdf/2601.21391v1)
-[Exploration by Random Reward Perturbation](https://arxiv.org/pdf/2506.08737v1)
-[Curiosity-driven Exploration by Self-supervised Prediction (ICM)](https://arxiv.org/pdf/1705.05363)
-- [PPO and ICM GitHub Implementation](https://github.com/bonniesjli/icm#ppoicm)
-- [Official Impl](https://github.com/pathak22/noreward-rl)
-[Large-Scale Study of Curiosity-Driven Learning](https://arxiv.org/pdf/1808.04355)
-[EXPLORATION BY RANDOM NETWORK DISTILLATION](https://arxiv.org/pdf/1810.12894)
-- [Practical Impl](https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo_rnd_envpool.py)
-- Leave RND for now; first, ~~work on terminating when colliding with walls~~ with one building. then, ~~add cost for exiting and re-entering a building to punish repeated detections~~
-## Ignore Building After Entry
-[![Video 3](https://img.youtube.com/vi/EWgiY4UBIAI/hqdefault.jpg)](https://youtu.be/EWgiY4UBIAI)
+One of the most interesting ideas Dr. Li proposed to me was the intrinsic rewards. For much of the training process, I had noticed that the model often would not "take the long way" if it faced an obstacle (e.g. a wall) in its direct path to the entrapped casualty. After reading through OpenAI's [Large-Scale Study of Curiosity-Driven Learning](https://arxiv.org/pdf/1808.04355), I was extremely interested in incorporating some type of curiosity into the model, since it seemed prevalent to the type of environment many SAR scenarios fall under. 
+## Random Network Distillation
+After reviewing what OpenAI had already done, I found this paper: [EXPLORATION BY RANDOM NETWORK DISTILLATION](https://arxiv.org/pdf/1810.12894) and well as its [official implementation on GitHub](https://github.com/openai/random-network-distillation). \
+Random Network Distillation (RND) builds off of PPO but with an intrinsic reward for seeing new states (i.e. curiosity). However, forward-model curiosity methods can face issues because prediction error comes form multiple sources:
+1. Epistemic Uncertainty - This is when the model finds a new state it hasn't seen before. This is usually what "curiosity" means from an intuitive sense--new information == more intrinsic/curious reward
+2. Stochasticity / Aleatoric Uncertainty - When an agent finds something that is not deterministic,. This interferes with forward-model curiosities because of something called "the noisy TV problem." Basically, if an agent finds a TV with static noise, because each state will have a new noise pattern, it will have high curiosity for the TV.
+3. Model Misspecification - The predictor model is unable to accurately represent the target network. For example, if the target is a non-linear function while the predictor is a linear function, it will never be able to fully predit the target and, therefore, will always have aprediction error >>0
+4. Learning Dynamics - The predictor cannot find an accurate prediction model for the target function. Most often, if factors 1-3 are satisified, this is due to incorrect hyperparameters
 
-# 7-17-26
-Safety Constraints
+> RND obviates factors 2 and 3 since the target network can be chosen to be deterministic and inside the model-class of the predictor network (Burda et al. 2018)
+
+Therefore, the only factors that could influence RND's intrinsic reward are factors 1 (good) and 4 (can be adjusted). In practice, the researchers found that RND operated better than any other algorithm previously tested on the environment, and found better results when the agent explored non-episodic settings (i.e. no truncation). It may be worth trying to increase the episode length of the SAR environments to further incentivize exploration, since currently they are loosely tailored to the task.
+### SB3 Integration
+After reading through the paper, I wanted to start implementing it into the existing SB3 architecture I had settled on for the project. However, the implementation OpenAI went with was based on the impl of Schulman et al. (2017), which was different from how SB3 received observation and reward spaces. So, I had to subclass the existing SB3 PPO implementation and add onto it an RND module that introduced the intrinsic reward for curiosity. \
+Empirically, RND seemed to work better than PPO, with success rates in the `90-100%`percentile range for the SASC with Obstacles, SAEC, and SAEC with Distractor environments. However, this was only after I added additional logic that helped the agent ignore buildings that had no entrapped casualty.
+## Building Reward Hacking
+Even though I was seeing RND improving the policy, there was something in common with all of these policies that I wanted to fix. After entering a building, the agent would repeatedly enter and exit that same building. There were multiple ways I tried to fix this, which I will lay out below:
+### Punishment for Re-Entry
+Since PPO does not take into consideration costs, the only way to influence its policy is through the reward it receives. So, the most simple idea I could think of was to have a negative reward that scales as the agent tries multiple times to enter the same building. I could gate the detection system using the same method I used for the `self.prev_casualty_visible` parameter I used [earlier](#07-14-26). Instead, though, each time the variable was triggered, a `cost_multiplier` would decrease by `1/num`. E.g. with `num=2`, the reward for entering a building becomes
+$$  0.5 \rightarrow 0.0 \rightarrow -0.5 \rightarrow -1.0 \rightarrow ... \rightarrow -\infty$$
+One thing I forgot when making this, though, was that PPO does not work well with non-normalized rewards. In other words, the negative punishments were likely harming the model instead of helping it, which was reflected in the performance differences (none) in this new model
+### Ignore Inside Building
+The next method I tried was to ignore the building while it was inside. Based on what the policy believed was optimal, I could assume that it was just going to wherever the highest building lidar was located. Because of this assumption, I believed that if I made the building lidar disappear, then it would hone in on the further building. \
+This worked until the agent left the building again. Once that happened, then it would see the building it had previously entered and return to the original building. In hindsight, this was a pretty easy behavior to predict, but it helped me settle on my final strategy for the building environment.
+### Ignore Building After Entry
+In the end, I made it so that once the agent entered a building, that building's lidar was "turned off" for all agents (for future MAS envs), essentially marking it as "explored." Once I did this, the next run that I did for the environment resulted in `46/50 (92.0%)` success rate, which was awesome to see! Attached below is a video of that run. In my opinion, it is really cool to see how the agent navigates the walls to search one building after another.
+[![Video 3](https://img.youtube.com/vi/EWgiY4UBIAI/hqdefault.jpg)](https://youtu.be/EWgiY4UBIAI) 
+
+# 07-17-26
+
+## Wall Collision Detection
+Now that I had a working policy for the four environments I wanted to use (for now) (SASC, SASC-Obstacle, SAEC-Obstacle, SAEC-Obstacle-Distractor), Zijian recommended that I try to emphasize safe RL using wall collisions as the first step. Once the agent can account for costs as a result of constraints,  I hope to incorporate multi-agent systems because the agent must be able to avoid multiple potential costs simultaneously for a MAS to work. \
+The first type of wall collision I tried was direct collision with the agent. Luckily, MuJoCo comes with a contact property that lets you see if objA has contacted objB, which I was able to use for this purpose. However, when I tested it in my debug environment, I found out that the "Point" agent body only accounts for the sphere and not the camera rectangle that is attached. This means that the agent would often not realize that it was colliding with the wall and continue trying to phase through the wall, where it knew the building was on the other side. \
+After seeing this, I then tried to use the gremlin MoCap with a similar utilization (i.e. the contact property). This worked a lot better after resizing and adjusting the position of the gremlin relative to the agent until it was at a place that I was satisfied with. \
+I ran all PPO and RND to see how they performed, and both did not do good. Normal PPO had a `66%`success rate with the SAEC-Obstacle env and a `0%`success rate with the SAEC-OD env. While RND had a `66%`and `44%`success rates, respectively. Seeing this, I knew that I needed a different algorithm that took into account the costs of its actions.
+## Safety Constraints
+So, I asked Zijian for recommendations as to what I could use, and here is what he suggested: 
 - Lagrangian PPO
-	- MinMax policy with lagragian
+	- MinMax policy with lagrangian
 	- OmniSafe (X)
 - CBF - Control Barrier Function
 	- Model cost using CBF
 - Hamilton-Jacobian Reachability Analysis
 	- Model safety constraints >> Maximize reward such that cost is below threshold N
+He told me to go with PPO Lagrangian because it was the simplest to implement (relatively). Luckily, OpenAI already implemented PPO Lagrangian as part of their paper [Benchmarking Safe Exploration in Deep Reinforcement Learning](cdn.openai.com/safexp-short.pdf), where they introduce Safety-Gym as well. Using that information, I was able to ask AI to make an implementation that works directly with Stable-Baselines-3. Once I did that, I tested it on the SAEC-Obstacle environment and achieved `72%`accuracy. I was definitely more pleased with that result, so I set out to try 
 ```sh
 Traceback (most recent call last):
   File "/home/akhaled/RISE-2026/SpecRLBench/debug_env.py", line 24, in <module>
@@ -1084,6 +1123,23 @@ ValueError: too many values to unpack (expected 5)
 ```
 Means that environment not set with safety wrapper.
 
+# 07-18-26
+# 07-19-26
+# 07-20-26
+Look into more papers and see if their method can be used to train in current environment
+- CPO, PPO-Lagrangian, SAC-Lagrangian, TRPO-Lagrangian
+	- [Safety Starter Agents](https://github.com/openai/safety-starter-agents/tree/master) (!!)
+
+# 07-21-26
+```sh
+tmux
+cd SpecRLBench/; conda activate specbench; export DISPLAY=":10"; python train/{ALGO}_train_env.py
+```
+
+## Safe PO Migration
+```sh
+cd ~/RISE-2026/SpecRLBench && python train/ppo_lag_train_env.py --task PointLTL4MASAR1WC-v0 --seed 0 --total-steps 1000000 --num-envs 8 --steps-per-epoch 16384 --device cuda --device-id 1 --write-terminal True --use-tensorboard True
+```
 
 --- 
 #project/idea 
