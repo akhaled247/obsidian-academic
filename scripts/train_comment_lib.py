@@ -43,6 +43,7 @@ CANONICAL_FLAGS = {
     "cost-limit",
     "lagrangian-multiplier-init",
     "lagrangian-multiplier-lr",
+    "ent-coef",
     "algo",
 }
 
@@ -102,6 +103,8 @@ def _canonical_flag(token: str) -> str | None:
         "env-id": "task",
         "lr-end-factor": "lr_end_factor",
         "lr_end_factor": "lr_end_factor",
+        "ent_coef": "ent-coef",
+        "ent-coef": "ent-coef",
     }
     if name in aliases:
         return aliases[name]
@@ -257,15 +260,7 @@ def encode_command(text: str) -> str:
         f"λc{fmt_num(_require(flags, 'lam-c'), style='decimal')}",
     ]
 
-    if algo in LAG_ALGOS:
-        parts.extend(
-            [
-                f"Cl{fmt_num(_require(flags, 'cost-limit'), style='decimal')}",
-                f"μ0{fmt_num(_require(flags, 'lagrangian-multiplier-init'), style='decimal')}",
-                f"αμ{fmt_num(_require(flags, 'lagrangian-multiplier-lr'), style='scientific')}",
-            ]
-        )
-    elif algo in CPO_ALGOS:
+    if algo in CPO_ALGOS:
         parts.append(f"Cl{fmt_num(_require(flags, 'cost-limit'), style='decimal')}")
 
     if algo in PPO_FAMILY:
@@ -280,7 +275,20 @@ def encode_command(text: str) -> str:
             raise ValueError("missing required flag --lr_end_factor for PPO-family algos")
         parts.append(f"lre{fmt_num(str(lre), style='decimal')}")
 
-    return "# " + "_".join(parts)
+    if algo in LAG_ALGOS:
+        parts.extend(
+            [
+                f"cl{fmt_num(_require(flags, 'cost-limit'), style='decimal')}",
+                f"λi{fmt_num(_require(flags, 'lagrangian-multiplier-init'), style='decimal')}",
+                f"λlr{fmt_num(_require(flags, 'lagrangian-multiplier-lr'), style='scientific')}",
+            ]
+        )
+
+    ent_coef = flags.get("ent-coef")
+    if isinstance(ent_coef, str):
+        parts.append(f"ec{fmt_num(ent_coef, style='decimal')}")
+
+    return "'" + "_".join(parts) + "'"
 
 
 def _strip_comment_prefix(comment: str) -> str:
@@ -313,6 +321,59 @@ def _take_prefixed(tokens: list[str], idx: list[int], prefix: str, key: str) -> 
     return tok[len(prefix) :]
 
 
+def _apply_tail_token(tok: str, parsed: dict[str, str | list[str]]) -> None:
+    """Parse one suffix token (order-flexible; supports legacy + vault aliases)."""
+    rules: list[tuple[str, tuple[str, ...], str]] = [
+        ("lagrangian-multiplier-lr", ("λlr", "αμ"), "value"),
+        ("lagrangian-multiplier-init", ("λi", "μ0"), "value"),
+        ("cost-limit", ("cl", "Cl"), "value"),
+        ("ent-coef", ("ec",), "value"),
+        ("lr_end_factor", ("lre",), "value"),
+        ("clip-ratio", ("ε",), "value"),
+        ("max-grad-norm", ("g",), "value"),
+        ("hidden-sizes", ("h",), "hidden"),
+    ]
+    for key, prefixes, kind in rules:
+        for prefix in sorted(prefixes, key=len, reverse=True):
+            if not tok.startswith(prefix):
+                continue
+            if key in parsed:
+                raise ValueError(f"duplicate token for --{key}: {tok!r}")
+            val = tok[len(prefix) :]
+            if kind == "hidden":
+                parsed[key] = val.replace("x", "×").split("×")
+            else:
+                parsed[key] = val
+            return
+    raise ValueError(f"unrecognized comment token: {tok!r}")
+
+
+def _validate_parsed(algo: str, parsed: dict[str, str | list[str]]) -> None:
+    missing = [k for k in REQUIRED_CORE if k not in parsed]
+    if missing:
+        raise ValueError(f"comment missing encoded fields: {', '.join(missing)}")
+
+    if algo in LAG_ALGOS:
+        for key in ("cost-limit", "lagrangian-multiplier-init", "lagrangian-multiplier-lr"):
+            if key not in parsed:
+                raise ValueError(f"comment missing --{key} for {algo}")
+    elif algo in CPO_ALGOS and "cost-limit" not in parsed:
+        raise ValueError(f"comment missing --cost-limit for {algo}")
+
+    if algo in PPO_FAMILY:
+        for key in ("clip-ratio", "lr_end_factor"):
+            if key not in parsed:
+                raise ValueError(f"comment missing --{key} for {algo}")
+    else:
+        for key in ("clip-ratio", "lr_end_factor"):
+            if key in parsed:
+                raise ValueError(f"unexpected --{key} token for {algo}")
+
+    hidden = parsed.get("hidden-sizes")
+    if not isinstance(hidden, list) or not hidden:
+        raise ValueError("comment missing --hidden-sizes")
+
+
 def parse_comment(comment: str) -> tuple[str, dict[str, str | list[str]]]:
     """Parse comment tag into algorithm name and flag dict."""
     tag = _strip_comment_prefix(comment)
@@ -341,30 +402,11 @@ def parse_comment(comment: str) -> tuple[str, dict[str, str | list[str]]]:
     parsed["lam"] = _take_prefixed(tokens, idx, "λ", "lam")
     parsed["lam-c"] = _take_prefixed(tokens, idx, "λc", "lam-c")
 
-    if algo in LAG_ALGOS:
-        parsed["cost-limit"] = _take_prefixed(tokens, idx, "Cl", "cost-limit")
-        parsed["lagrangian-multiplier-init"] = _take_prefixed(
-            tokens, idx, "μ0", "lagrangian-multiplier-init"
-        )
-        parsed["lagrangian-multiplier-lr"] = _take_prefixed(
-            tokens, idx, "αμ", "lagrangian-multiplier-lr"
-        )
-    elif algo in CPO_ALGOS:
-        parsed["cost-limit"] = _take_prefixed(tokens, idx, "Cl", "cost-limit")
+    while idx[0] < len(tokens):
+        _apply_tail_token(tokens[idx[0]], parsed)
+        idx[0] += 1
 
-    if algo in PPO_FAMILY:
-        parsed["clip-ratio"] = _take_prefixed(tokens, idx, "ε", "clip-ratio")
-
-    parsed["max-grad-norm"] = _take_prefixed(tokens, idx, "g", "max-grad-norm")
-    hidden_tok = _take_prefixed(tokens, idx, "h", "hidden-sizes")
-    parsed["hidden-sizes"] = hidden_tok.replace("x", "×").split("×")
-
-    if algo in PPO_FAMILY:
-        parsed["lr_end_factor"] = _take_prefixed(tokens, idx, "lre", "lr_end_factor")
-
-    if idx[0] != len(tokens):
-        raise ValueError(f"unexpected trailing tokens: {tokens[idx[0]:]}")
-
+    _validate_parsed(algo, parsed)
     return algo, parsed
 
 
@@ -464,7 +506,14 @@ def format_shell(
     else:
         lines.append(parallel_prefix)
 
-    return "\n".join(lines)
+    shell = "\n".join(lines)
+    ent_coef = flags.get("ent-coef")
+    if isinstance(ent_coef, str):
+        shell = (
+            f"# ent_coef={ent_coef} (SB3/fork only; SafePO stock CLI has no --ent-coef)\n"
+            + shell
+        )
+    return shell
 
 
 def decode_comment(comment: str, extras: DecodeExtras | None = None) -> str:

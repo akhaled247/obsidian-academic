@@ -1156,6 +1156,12 @@ cd SpecRLBench/; conda activate specbench; export DISPLAY=":10"; python train/{A
 ```sh
 cd ~/RISE-2026/SpecRLBench && python train/ppo_lag_train_env.py --task PointLTL4MASAR1WC-v0 --seed 0 --total-steps 1000000 --num-envs 8 --steps-per-epoch 16384 --device cuda --device-id 1 --write-terminal True --use-tensorboard True
 ```
+# 07-22-26
+- POC SafePO migration -- make sure all tasks are completable with high accuracy
+- Transition to multi-agent environment (PPO, HAPPO, MAPPO & variations)
+- Different ways to train multi-agent environments
+
+= Objective/Motivation - Higher-level (broad audience), challenges. What are we trying to achieve. Explain scientific contributions. Explain what you did (framework, setup); Present algorithms, experimental systematic evaluation (graphics/pictures); visual demos of project
 
 --- 
 #project/idea 
