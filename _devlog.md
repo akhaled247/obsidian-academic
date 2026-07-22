@@ -1114,15 +1114,31 @@ So, I asked Zijian for recommendations as to what I could use, and here is what 
 	- Model cost using CBF
 - Hamilton-Jacobian Reachability Analysis
 	- Model safety constraints >> Maximize reward such that cost is below threshold N
-He told me to go with PPO Lagrangian because it was the simplest to implement (relatively). Luckily, OpenAI already implemented PPO Lagrangian as part of their paper [Benchmarking Safe Exploration in Deep Reinforcement Learning](cdn.openai.com/safexp-short.pdf), where they introduce Safety-Gym as well. Using that information, I was able to ask AI to make an implementation that works directly with Stable-Baselines-3. Once I did that, I tested it on the SAEC-Obstacle environment and achieved `72%`accuracy. I was definitely more pleased with that result, so I set out to try 
+He told me to go with PPO Lagrangian because it was the simplest to implement (relatively). Luckily, OpenAI already implemented PPO Lagrangian as part of their paper [Benchmarking Safe Exploration in Deep Reinforcement Learning](cdn.openai.com/safexp-short.pdf), where they introduce Safety-Gym as well. Using that information, I was able to ask AI to make an implementation that works directly with Stable-Baselines-3. Once I did that, I tested it on the SAEC-Obstacle environment and achieved `72%`accuracy. I was definitely more pleased with that result, so I set out to try the other environments. However, they had similar results to what PPO was giving me natively, so I was slightly confused. After some hyperparameter tuning, though, PPO Lagrangian was able to get `12%` on the hardest task, which was definitely progress.
+## Wall Collision Envs
+Now that I had wall collisions working as intended, I wanted to separate the non- and yes- wall colliding tasks so that it would be easier to train the models and I would be able to have a wider spread of testing environments. I faced this issue when I tried to edit `env_utils.py`, though to add a wall collision wrapper to environments with "WC" in the name:
 ```sh
 Traceback (most recent call last):
   File "/home/akhaled/RISE-2026/SpecRLBench/debug_env.py", line 24, in <module>
     obs, reward, terminated, truncated, info = env.step(action)
 ValueError: too many values to unpack (expected 5)
 ```
-Means that environment not set with safety wrapper.
+This meant that the environment was not set with the safety wrapper. To fix this, I just had to add some logic to trim and detect WC envs:
 
+```python
+if 'WC' in env_name:
+	env = safety_gymnasium.make(env_name.replace("WC", ""), disable_env_checker=True, render_mode=render_mode)
+else:
+	env = safety_gymnasium.make(env_name, disable_env_checker=True, render_mode=render_mode)
+if "SAR" in env_name:
+	if 'WC' in env_name:
+		env = SafetyGymWrapperMASARWC(env, sb3=sb3)
+	else:
+		env = SafetyGymWrapperMASAR(env, sb3=sb3)
+elif "MA" in env_name:
+	# ...
+```
+With this, I was able to easily switch between no and yes collision tasks, making it a lot easier to work with.
 # 07-18-26
 # 07-19-26
 # 07-20-26
