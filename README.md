@@ -1175,12 +1175,15 @@ Today I ran a bunch of tests on most of the algorithms OpenAI benchmarked using 
 | SAC      | 98  | 74  | X    | X   | X    | X   | X    
 Note that these were achieved after tuning, which is why there isn't much in the way of updates this day. 
 # 07-21-26
+Today, I first started with some minor tweaks to how I was able to run events and load them again. I also streamlined the tmux $\rightarrow$ train pathway:
 ```sh
 tmux
 cd SpecRLBench/; conda activate specbench; export DISPLAY=":10"; python train/{ALGO}_train_env.py
 ```
+## SB3 Emigration
+However, the main part of the project that I worked on was the initial migration to Safe PO. I realized that, if I wanted to do MA tasks rather than the SA ones I was currently doing, I would have to write more custom SB3-coded implementations of the algorithms. SB3 already didn't natively support Lagrangian variations of the algorithms nor RND, and on top of this, I would have to write packages for MAPPO, HAPPO, and their Lagrangian variations too! I thought that this was too much custom code, so I began to search at different libraries I could use instead.
+### OmniSafe
 
-## Safe PO Migration
 ```sh
 cd ~/RISE-2026/SpecRLBench && python train/ppo_lag_train_env.py --task PointLTL4MASAR1WC-v0 --seed 0 --total-steps 1000000 --num-envs 8 --steps-per-epoch 16384 --device cuda --device-id 1 --write-terminal True --use-tensorboard True
 ```
