@@ -342,12 +342,6 @@ _models/ppo_20260720_1644_PointLTL6MASAR1-v0_0
 Mean reward: 0.940 +/- 0.237
 Rescue rate: 47/50 (94.0%)
 Mean ep_len: 637.820 +/- 572.917
-
-_models/sac_20260720_1505_PointLTL4MASAR1-v0_0
-========================================
-Mean reward: 0.440 +/- 0.496
-Rescue rate: 22/50 (44.0%)
-Mean ep_len: 608.280 +/- 443.203
 ```
 # PPO Lagrangian
 ```shell

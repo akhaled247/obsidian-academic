@@ -184,6 +184,9 @@
 - ~~cost for collisions to walls or terminate (test)~~
 - ~~surface casualties ~~
 - ~~multiple buildings, some have casualties~~
+- Look into more papers and see if their method can be used to train in current environment
+	- CPO, ~~PPO-Lagrangian, SAC-Lagrangian, TRPO-Lagrangian~~
+		- [Safety Starter Agents](https://github.com/openai/safety-starter-agents/tree/master) (!!)
 - LLM where we specify agent and casualties and explain what to avoid etc. and have LLM generate high level plan, call low level controller (A*, something else)
 
 # 06-29-26
@@ -345,7 +348,7 @@ I started the day out by trying to understand how environments are created. A ru
 - `\ltl` - the directory where all of the LTL-specific tasks are created
 	- `ltl_base_task` - built off of `base-task`, it allows the user to encode LTL tasks. Used by other ltl tasks in `\ltl`
 - *Note: These tasks must be imported into the `__init.py__` file in the `\tasks` directory* \
-After exploring the repository more, I was able to create my own custom task `multi-goal-level3` and my own gym wrapper `safety_gym_wrapper_ma_sro` and integrate them into the existing codebase. \
+After exploring the repository more, I created my own custom task `multi-goal-level3` and my own gym wrapper `safety_gym_wrapper_ma_sro` and integrate them into the existing codebase. \
 After that, I moved on to diving deeper into how simulation environments for search and rescue (SAR) environments are currently constructed. Below are all of the papers that I have analyzed so far to learn about how to make a new environment that would satisfy the goals outlined in the presentation provided. 
 ## 07-02-06 Papers
 #### [Unmanned Ground Robots for Rescue Tasks](https://www.intechopen.com/chapters/56080)
@@ -432,7 +435,7 @@ As shown in my initial [mock-up](#mock-up), I wanted to make buildings that had 
 ### Border Placement
 After incorporating [ringed placements](#ringed-placements) when creating the walls, I simply reconfigured that code for the borders. Since I already had an understanding of the `placements` format at this point, it didn't take as long to set this up as it did the first time. Now, when `border_placements()` is called, it creates a "picture frame" that is hollow in the inside so that buildings only spawn on the outskirts of the SARE.
 ### Spawning Buildings
-I was able to take the `Zones(Geom)` class and refactored it for it to become a building. The changes I made are listed below:
+I took the `Zones(Geom)` class and refactored it for it to become a building. The changes I made are listed below:
 1. Changed the `type` to `"box"` instead of `"cylinder"`
 2.  Added `placements`, `keepout`, and `alpha` parameters to incorporated `border_placements()` and visual changes
 3. Slimmed down the colors to <span style="color:light_grey"><code>light_gray</code></span> (to distinguish from `gray` walls), <span style="color:red">red</span>, <span style="color:yellow"><code>yellow</code></span>, and <span style="color:lime"><code>green</code></span>, the latter three of which I hope to incorporate into my costs as more risky candidates. \
@@ -449,7 +452,7 @@ if self.observe_vision:
 		name = f'vision_{i}'
 		obs[name] = self._obs_vision(camera_name=name)
 ```
-This way, the vision camera creation was agent-number-agnostic. This code was already somewhat implemented between the lidar sensors and the manual setting from the one-agent system, so I was able to extrapolate into this condition. \
+This way, the vision camera creation was agent-number-agnostic. This code was already somewhat implemented between the lidar sensors and the manual setting from the one-agent system, so I extrapolated that into this condition. \
 After that, the vision worked! In the `obs` keys, `vision_0,1,...` is registered, and with the proper formatting (since I used `_obs_vision()`, I didn't have to configure that). However, since the camera renders with the same methods as the rendering for casualties, I made this little helper statement:
 ```python
 render_mode = "casualty" if 'Vision' not in env_name else None
@@ -471,13 +474,13 @@ But today, I wanted to get more into the granularities of what that meant. So, h
 4. Building casualties should spawn inside buildings (obviously) \
 *Note: If looking at the code, I created the class called `Casualtys` since it would turn into `var_casualty` during the actual environment building. I know that's not how you spell it, but it made the workflow more modular.*
 ### Surface
-Once again, I was able to reuse the `Zones` geom class for the surface casualties, simply chaging the type to the capsule and adjusting some of the color options to be more in line with what I wanted. Like the buildings, I made them opaque, gave them the ability to have custom `locations` and `placements`, and adjusted the `size` parameters accordingly.
+Once again, I reused the `Zones` geom class for the surface casualties, simply chaging the type to the capsule and adjusting some of the color options to be more in line with what I wanted. Like the buildings, I made them opaque, gave them the ability to have custom `locations` and `placements`, and adjusted the `size` parameters accordingly.
 ### Entrapped
-Now, making the entrapped casualties was more challenging than the surface ones, since I had to make them sync up with the building locations (which were at-time being set randomly by the [border placements](#border-placements)). The first thing I tried to do was retrieve the `pos` of the buildings. First, I head to retrieve the attributes of the Building class using `dir(self._geoms.get('light_gray_buildings')`. From there, I found out the `pos()` method, (I could've also checked the `buildings.py` class and seen it there), and was able to call it using `self._geoms.get('light_gray_buildings').pos()`, which returned a list of triples. However, I was calling this in the `specific_reset()` method since those positions weren't yet initialized in the `_build()` method. This meant that I could not modify the positions of the entrapped casualties within that reset method. \
+Now, making the entrapped casualties was more challenging than the surface ones, since I had to make them sync up with the building locations (which were at-time being set randomly by the [border placements](#border-placements)). The first thing I tried to do was retrieve the `pos` of the buildings. First, I head to retrieve the attributes of the Building class using `dir(self._geoms.get('light_gray_buildings')`. From there, I found out the `pos()` method, (I could've also checked the `buildings.py` class and seen it there), and called it using `self._geoms.get('light_gray_buildings').pos()`, which returned a list of triples. However, I was calling this in the `specific_reset()` method since those positions weren't yet initialized in the `_build()` method. This meant that I could not modify the positions of the entrapped casualties within that reset method. \
 From there, I pivoted to what I had done for the `Walls`, since those required randomized sizes that were cached at the initial startup build. I realized that I could use a similar idea to what I did there, but instead of making the sizes, I would be making `locations`. Using the `border_placements()` code as a foundation, I made a wrapper method called `border_locations()` that took in the border parameters as well as the `num` of buildings being spawned in, the `RandomGenerator` object of the task, and `keepout` for the `draw_placements()` method I recycled from the `RandomGenerator` class. The method returns "a list of (x, y) locations from the `random_generator` that can be used when updating locations in the `_build()` method of a task." \
 When I first tested it out, though, the simulation would not load. At the time, I assumed it had to be because of the locations generating inside one of the other objects, and I was right! After creating a [Desmos graph](https://www.desmos.com/calculator/bcqjpzneh6) to help me visualize the parameters I had set, I saw that there was some overlap between the placements of the Walls and Buildings. After tweaking the parameters and checking the simulation multiple times, I ended up with the params you can see in the graph. The sim now loads in ~5 seconds, which is pretty good considering all of the walls, casualties, and buildings it has to loads, and there isn't interference between the objects.
 #### Additional Initial Setup
-Since there were more geoms I was editing in the `_build()` method, I created a `_replace_geom()` method that allowed me to replace geometries more easily in the multi-agent environment. I also made it so that there were fewer entrapped casualties than surface casualties (but still had them add up to `num_agents`) [TODO: Find more research determining this ratio and incorporate it into the environment]. I also changed the colors of the buildings to be more building-like and help distinguish them from the walls. I also added a `debug` attribute to the `Buildings` class so that I could make them translucent when I want to see if the entrapped casualties have been spawned correctly but also make them easy to turn solid (e.g. when using vision). Current progress: ![](Images/casualties_onepoint_view.png)
+Since there were more geoms I was editing in the `_build()` method, I created a `_replace_geom()` method that allowed me to replace geometries  in the multi-agent environment. I also made it so that there were fewer entrapped casualties than surface casualties (but still had them add up to `num_agents`) [TODO: Find more research determining this ratio and incorporate it into the environment]. I also changed the colors of the buildings to be more building-like and help distinguish them from the walls. I also added a `debug` attribute to the `Buildings` class so that I could make them translucent when I want to see if the entrapped casualties have been spawned correctly but also make them easy to turn solid (e.g. when using vision). Current progress: ![](Images/casualties_onepoint_view.png)
 \
 Next, I want to show this to Zijian to get approval to continue making the policy wrapper, which will definitely be interesting.
 # 07-05-26
@@ -511,7 +514,7 @@ print(safe_registry_custom)
 # 07-06-26
 ## Agent Spawn Parameters
 The first thing that I worked on was the agent spawning within the inner radius, which I had briefly started before coming to the lab. At first, I tried to do what I had done previously with the buildings and walls, which is replace the existing instance of them from within the `_build()` function. However, that didn't work because the agents are actually built in a separate `_build_agent()` function that runs as part of the init method of the `underlying` class. \
-So, I had to modify the existing class to add two new parameters (`placements` and `keepout`), which I was able to then use in my task init function like so: `self._build_agent(self.agent_name, keepout=0.2, placements=[(-0.67, -0.67, 0.67, 0.67)])`. \
+So, I had to modify the existing class to add two new parameters (`placements` and `keepout`), which I used in my task init function like so: `self._build_agent(self.agent_name, keepout=0.2, placements=[(-0.67, -0.67, 0.67, 0.67)])`. \
 However, even then, I was getting issues where the simulation would stall for no apparent reason. It was then that I discovered that the `gremlin` class that was being used to repreesnt the other agents had a bug in it. After digging through the code, I found that the `self.agent.get_agent_pos(i)` method it was using would always return `[0., 0., 0.1]`; meaning that these gremlins were all spawning at the center and not moving to the actual agent pos. This was causing issues because since the gremlins wouldn't move and they were very close to the agents, there wasn't space for both to coexist. So, I had to use the world engine (via `self.engine`) and find the agent's pose data from there, since that class is updated every step, not just at initialization (i.e. `agent_xy = self.engine.data.body(f'agent_{i}').xpos[:2]`.   \
 You may notice that instead of the `ring_placements()` method, I just have a box with the bounding values in it. I found that since I've already created a [graphing helper](https://www.desmos.com/calculator/bcqjpzneh6), I could just plug numbers into there until I found the box size that maximized the space. This way, I wouldn't have to worry about complicated geometry and in the end, it would likely not provide much benefit.
 ## Pseudo Lidar Reversion 
@@ -586,7 +589,7 @@ The first step was to make the Debug environments fit the naming convention of t
 The next step was to make the point actually move with the press of the keys. At first, I didn't know how that would even work. After looking at the code, I saw that the Point class has a `debug()` method baked into the code, where it takes an action and encodes it into an array that would be passed into `apply_action(action)`. When I tried this code, though, it was returning \
 `ValueError: operands could not be broadcast together with shapes (4,) (10,) (10,)` \
 This was because the action space is 5 agents x 2 inputs (forward/backward movement and turning), so there should be 10 inputs given. However, the existing code was meant for a 1 agent x 4 inputs (which doesn't really make sense, since it should only take in 2). \
-To fix this, I initially thought to change the `apply_action` method. Since I did not know what the ValueError was confused about, I tried to return five copies of the original action space but with two inputs instead of 4, but that also didn't work. Next, I tried flattening the `clip` function, but that made a list of `(20, )` which also didn't line up with what the actual action space was. After that, I edited the action submission so that I would submit an array of shape `(agent_num*2, )` (*Note: added afterward so `agent_num` is driving the length i.e. not static)*. When the keys were pressed, it would submit to positions 0 and 1 of this list. When I tested this, though, it would move the first two agents forward and backwards (without rotating). It seems as though the action space is formatted such that `[all_translations, all_rotations]` instead of `[translation_0, rotation_0, trans_1, rot_1, ..., trans_N, rot_N` like I expected. Once I learned that, I instead submitted the rotation to position `agent_num`, and I was able to control the agent!
+To fix this, I initially thought to change the `apply_action` method. Since I did not know what the ValueError was confused about, I tried to return five copies of the original action space but with two inputs instead of 4, but that also didn't work. Next, I tried flattening the `clip` function, but that made a list of `(20, )` which also didn't line up with what the actual action space was. After that, I edited the action submission so that I would submit an array of shape `(agent_num*2, )` (*Note: added afterward so `agent_num` is driving the length i.e. not static)*. When the keys were pressed, it would submit to positions 0 and 1 of this list. When I tested this, though, it would move the first two agents forward and backwards (without rotating). It seems as though the action space is formatted such that `[all_translations, all_rotations]` instead of `[translation_0, rotation_0, trans_1, rot_1, ..., trans_N, rot_N` like I expected. Once I learned that, I instead submitted the rotation to position `agent_num`, and I could control the agent!
 ![](Images/agent_manual_keyboard_ctrl.gif)
 ## Rewards and Punishments
 The next item on the task list that I wanted to get done was identifying the rewards and punishments in the `safet_gym_wrapper_ma_sro.py`. The existing code was only looking at the `zones` geom as the main driver of cost. However, since I wanted to make it more generalizable, I filter the `agent_info` for any entries with a value greater than 0 that is not `"cost_sum"`. That way, I only have active propositions, its generalizable for any geom with a cost, and I discard the rest of the data. \
@@ -627,7 +630,7 @@ In the GIF above, each of the nested arrays correspond with the keys shown above
 I had to migrate the repo that currently lived locally to the RISE-2026 repo in the BU Depend Lab organization. However, James was already using that repo for his own work, which is not related (codewise) to mine. So, he had to merge his changes, make a new branch with his code while I made one with mine, and clear the main branch. We plan to use the main branch to summarize our work and include links so that it's easier to find our work.
 >[!success] When talking to Dr. Li, he mentioned that I can also have the repository on my own personal GitHub account, so once the internship ends, I will probably fork my branch to my personal one so that it's easier for me to share.
 ## Remote Desktop Setup
-Now that I had approval from Zijian to try to move forward with setting up the repository in the remote desktop. I knew that James had already done something similar, so I asked him for help. He told me that I should create the repository from VS Code because it creates a tunnel that bypasses the auth required if using the terminal in the remote desktop. Once I SSH'd in on my local machine, I was able to clone the Depend Lab repository and checkout my branch. \
+Now that I had approval from Zijian to try to move forward with setting up the repository in the remote desktop. I knew that James had already done something similar, so I asked him for help. He told me that I should create the repository from VS Code because it creates a tunnel that bypasses the auth required if using the terminal in the remote desktop. Once I SSH'd in on my local machine, I cloned the Depend Lab repository and checkout my branch. \
 Yet I ran into an issue where the SpecRLBench submodule I had created wasn't being pulled with the rest of the code, so with James' guidance I removed the submodule so that the whole repository is self-contained. \
 However, I saw that there was a bunch of cached `*.pyc` files that were being added to the repository, so I had to add a new `.gitignore` in the `RISE-2026` folder with these contents:
 ```bash
@@ -766,7 +769,7 @@ From what I could tell, though, PPO did not extend to multi-agent environments. 
 # 07-09-26
 Today, I worked on debugging the PPO and adjusting the rewards so that the agents would complete the goals in the manner I expected.
 ## SAR Levels
-After conducting my literature review (specifically [this](https://github.com/elte-collective-intelligence/student-search#abstract) GitHub repository), I decided that it would be a good idea to add levels to my environments. This way, I could more easily test the PPO algorithm without jumping straight into the super complex task, which will probably take longer to train as well. In the end, I made four levels, each with two agents:
+After conducting my literature review (specifically [this](https://github.com/elte-collective-intelligence/student-search#abstract) GitHub repository), I decided that it would be a good idea to add levels to my environments. This way, I could  test the PPO algorithm without jumping straight into the super complex task, which will probably take longer to train as well. In the end, I made four levels, each with two agents:
 - Level 0: Only surface casualties (N=`agent_num`). This is what I am using for testing the PPO, rewards, etc.
 - Level 1: Half surface casualties, half entrapped casualties. I want to see whether providing rewards for going into buildings is good or not, so this is a good start
 - Level 2: Same as L1, but with walls (N=5). This will allow me to tune how navigation works to encourage exploration but balance exploitation
@@ -843,7 +846,7 @@ There was a lot of tweaking I did to get a model I was ~`70%`happy with, so I'm 
 - Implemented but ultimately did not run dense rewards using lidar observations to encourage the agent to move closer to the casualty. Because the reward from this trickle was more than the reward of the casualty over 1000 timesteps
 - Added vectorized environment creation to `env_utils.py` to reduce training time from ~28 min to ~20 min
 - Added logging of models and training logs so that models can be replayed and training can be compared over time, respectively. I also have a f-string making the model path so that models will be saved according to the environment they were trained in
-- Changed evaluation episodes to 10 (more for myself)-can more easily diagnose potential issues.
+- Changed evaluation episodes to 10 (more for myself)-can  diagnose potential issues.
 # 07-10-26
 Today, I struggled a lot with the implementation of PPO into the current multi-agent environment. I tried multiple different techniques to try to improve the model, but by the end of the day, I had gotten to the same place I had started with.
 ## Lower Rollout Sample Steps
@@ -890,7 +893,7 @@ By the end of the day, though, the PPO algorithm was behaving very similarly to 
 # 07-11-26
 
 # 07-12-26
-Today, I was set on making the PPO algorithm work, at least with a single agent. I was able to get it to work:
+Today, I was set on making the PPO algorithm work, at least with a single agent. It works!
 ![](Images/single_agent_ppo_policy_success.gif) 
 [https://youtu.be/In8nVy22jt8](https://youtu.be/In8nVy22jt8)
 # 07-13-26
@@ -1035,16 +1038,16 @@ Larger `batch_size`, less noisy gradient
 
 # 07-15-26
 ## Entrapped Casualties Pivot
-Once I showed these results to Zijian, he recommended that I switch from a partially observed environment to a fully observed environment. Since I didn't want to compromise the SAR environment, I was able to pivot to entrapped casualties rather than surface casualties. Since the buildings are visible above the agent's line of sight (unlike the surface casualties), it would make sense that it has the lidar estimate of where it is. Moreover, this aligns more closely with the [literature](#Papers) because more than one paper has suggested the use of UAV-UGV collaboration, where UAVs map out the environment while UGVs actually interact with the environment (UAVs == drones, so can't interact much). I first had to switch the task so that it incorporated `entrapped_casualtys` in addition to `surface_casualtys`, as well as debug a bunch of issues with the buildings.
+Once I showed these results to Zijian, he recommended that I switch from a partially observed environment to a fully observed environment. Since I didn't want to compromise the SAR environment, I pivoted to entrapped casualties rather than surface casualties. Since the buildings are visible above the agent's line of sight (unlike the surface casualties), it would make sense that it has the lidar estimate of where it is. Moreover, this aligns more closely with the [literature](#Papers) because more than one paper has suggested the use of UAV-UGV collaboration, where UAVs map out the environment while UGVs actually interact with the environment (UAVs == drones, so can't interact much). I first had to switch the task so that it incorporated `entrapped_casualtys` in addition to `surface_casualtys`, as well as debug a bunch of issues with the buildings.
 ### Building Randomization
 There were multiple issues with the randomization of the buildings and the building code in general. First off, the building would spawn in the same place every run, which I assumed would make the model overfit to that data. Moreover, I couldn't spawn more than one building at the same time, and the code made it difficult to work with and debug and I had a lot of issues trying to just get two buildings in the scene. Additionally, coordinating spawning the buildings, walls, and casualties was extremely difficult since I had to set their positions and rotations in different parts of the environment creation. Because this code was so complicated, I had AI help me with this portion. \
-However, what surprised me was that the model that was trained with only one building location was able to adapt to different building locations around the map, with `98%`accuracy! I will look into what caused this, but I am guessing that because there was enough randomization of the rest of the environment, the agent learning how to pathfind instead of just "go to this position" every time, which is really cool to see (image clickable):
+However, what surprised me was that the model that was trained with only one building location adapted to different building locations around the map, with `98%`accuracy! I will look into what caused this, but I am guessing that because there was enough randomization of the rest of the environment, the agent learning how to pathfind instead of just "go to this position" every time, which is really cool to see (image clickable):
 [![Video 3](https://img.youtube.com/vi/R8GvCAOcREs/hqdefault.jpg)](https://youtu.be/R8GvCAOcREs)
 ## Wall Collision Punishment
 Once I showed that the model could work with buildings, Zijian recommended me to punish the agent for colliding with any of the walls. This was a lot simpler to implement than the building code, because I had references from other geoms (e.g. gremlins, casualties) and the fact that the contact property is tracked by MuJoCo. Using the reward gates I've implemented for the visibility and entering buildings, I prevented punishments from recurring until the agent stops touching the wall. \
 Compared to the raw performance, this one was slightly worse, at `80%`success, but considering I only trained one model on this new environment, I was quite happy with it! I hope to continue shaping this reward so that it's less extreme (it's not nearly as sparse as the final reward, so it should be treated as such).
 ## Code Testing
-I asked AI to create tests for the code so that if changes are made, I can check what issues there are and debug them more easily using:
+I asked AI to create tests for the code so that if changes are made, I can check what issues there are and debug them  using:
 ```bash
 cd SpecBenchRL
 python -m pytest specbench/envs/zones/safety-gymnasium/tests/test_specrlbench_sar_contracts.py -q
@@ -1102,7 +1105,7 @@ In the end, I made it so that once the agent entered a building, that building's
 
 ## Wall Collision Detection
 Now that I had a working policy for the four environments I wanted to use (for now) (SASC, SASC-Obstacle, SAEC-Obstacle, SAEC-Obstacle-Distractor), Zijian recommended that I try to emphasize safe RL using wall collisions as the first step. Once the agent can account for costs as a result of constraints,  I hope to incorporate multi-agent systems because the agent must be able to avoid multiple potential costs simultaneously for a MAS to work. \
-The first type of wall collision I tried was direct collision with the agent. Luckily, MuJoCo comes with a contact property that lets you see if objA has contacted objB, which I was able to use for this purpose. However, when I tested it in my debug environment, I found out that the "Point" agent body only accounts for the sphere and not the camera rectangle that is attached. This means that the agent would often not realize that it was colliding with the wall and continue trying to phase through the wall, where it knew the building was on the other side. \
+The first type of wall collision I tried was direct collision with the agent. Luckily, MuJoCo comes with a contact property that lets you see if objA has contacted objB, which I used for this purpose. However, when I tested it in my debug environment, I found out that the "Point" agent body only accounts for the sphere and not the camera rectangle that is attached. This means that the agent would often not realize that it was colliding with the wall and continue trying to phase through the wall, where it knew the building was on the other side. \
 After seeing this, I then tried to use the gremlin MoCap with a similar utilization (i.e. the contact property). This worked a lot better after resizing and adjusting the position of the gremlin relative to the agent until it was at a place that I was satisfied with. \
 I ran all PPO and RND to see how they performed, and both did not do good. Normal PPO had a `66%`success rate with the SAEC-Obstacle env and a `0%`success rate with the SAEC-OD env. While RND had a `66%`and `44%`success rates, respectively. Seeing this, I knew that I needed a different algorithm that took into account the costs of its actions.
 ## Safety Constraints
@@ -1114,7 +1117,7 @@ So, I asked Zijian for recommendations as to what I could use, and here is what 
 	- Model cost using CBF
 - Hamilton-Jacobian Reachability Analysis
 	- Model safety constraints >> Maximize reward such that cost is below threshold N
-He told me to go with PPO Lagrangian because it was the simplest to implement (relatively). Luckily, OpenAI already implemented PPO Lagrangian as part of their paper [Benchmarking Safe Exploration in Deep Reinforcement Learning](cdn.openai.com/safexp-short.pdf), where they introduce Safety-Gym as well. Using that information, I was able to ask AI to make an implementation that works directly with Stable-Baselines-3. Once I did that, I tested it on the SAEC-Obstacle environment and achieved `72%`accuracy. I was definitely more pleased with that result, so I set out to try the other environments. However, they had similar results to what PPO was giving me natively, so I was slightly confused. After some hyperparameter tuning, though, PPO Lagrangian was able to get `12%` on the hardest task, which was definitely progress.
+He told me to go with PPO Lagrangian because it was the simplest to implement (relatively). Luckily, OpenAI already implemented PPO Lagrangian as part of their paper [Benchmarking Safe Exploration in Deep Reinforcement Learning](cdn.openai.com/safexp-short.pdf), where they introduce Safety-Gym as well. Using that information, I asked AI to make an implementation that works directly with Stable-Baselines-3. Once I did that, I tested it on the SAEC-Obstacle environment and achieved `72%`accuracy. I was definitely more pleased with that result, so I set out to try the other environments. However, they had similar results to what PPO was giving me natively, so I was slightly confused. After some hyperparameter tuning, though, PPO Lagrangian got `12%` on the hardest task, which was definitely progress.
 ## Wall Collision Envs
 Now that I had wall collisions working as intended, I wanted to separate the non- and yes- wall colliding tasks so that it would be easier to train the models and I would be able to have a wider spread of testing environments. I faced this issue when I tried to edit `env_utils.py`, though to add a wall collision wrapper to environments with "WC" in the name:
 ```sh
@@ -1138,14 +1141,39 @@ if "SAR" in env_name:
 elif "MA" in env_name:
 	# ...
 ```
-With this, I was able to easily switch between no and yes collision tasks, making it a lot easier to work with.
+With this, I could easily switch between no and yes collision tasks, making it a lot easier to work with.
 # 07-18-26
 # 07-19-26
+Today, I made some changes to how PPO Lagrangian was being run and added from QOL changes to the code.
+## SB3 Updates
+When I was first running PPO-Lag, I noticed that it was updating at a much different rate than I was used to seeing on the normal SB3 algorithms. After digging into the issue more, I realized that
+the Spinning Up implementation Open AI's PPO Lagrangian was based on was different than the implementation of SB3. Once I realized that, it wasn't super difficult to change it to SB3-style rollouts based on minibatches x epochs rather than the previous update style, which only took into account the number of iterations specified. \
+Since these mirrored more closely what I saw with SB3 PPO, I tuned the hyperparameters much more quickly and achieved a >70% success rate on L5WC (i.e. SAEC-Obs with WC)
+## Improved Lagrangian-RND-SB3 Parity
+Because I AI-generated the Lagrangian and RND code from established research papers, and because SB3 natively does not support constrained or intrinsic algorithms, there were quite a few parity issues I had to face. So, I rewrote the algorithms with an attempt to preserve as much as the original PPO algorithm as possible whilst continuing to have the original functionalities so that my results remained reproducible. 
+## CSV Logging
+One aspect that was quite annoying when trying to adjust hyperparameters was that I could visualize the logging via Tensorboard, but I couldn't directly copy-paste entire samples without going to each graph individually. Logging in the terminal created too much clutter, so I didn't want to use that either. After looking into [SB3 logger documentation](https://stable-baselines3.readthedocs.io/en/master/common/logger.html), I realized that I could write the terminal logs to a csv that I could easily look over later with minimal code additions:
+```python
+TRAINING_LOG_PATH = f"./_training_logs/ppo_lag_{env_name}_tensorboard/"
+tb_log_name = (
+            f"lag_t{name_time}"
+            f"_st{n_steps}"
+            # f"_{other_hyperparameters}"...)
+log_dir = f"{TRAINING_LOG_PATH}{tb_log_name}"
+model.set_logger(stable_baselines3.common.logger.configure(log_dir, ["csv", "tensorboard"]))
+```
+I could then use the csv file to parse through the data and find patterns.
 # 07-20-26
-Look into more papers and see if their method can be used to train in current environment
-- CPO, PPO-Lagrangian, SAC-Lagrangian, TRPO-Lagrangian
-	- [Safety Starter Agents](https://github.com/openai/safety-starter-agents/tree/master) (!!)
+Today I ran a bunch of tests on most of the algorithms OpenAI benchmarked using Safety Gym in their [original paper](https://cdn.openai.com/safexp-short.pdf) (i.e. PPO, PPO-Lagrangian, TRPO, TRPO-Lagrangian, ~~CPO~~) as well as the SAC and SAC-Lagrangian they implemented in their repository but not present in their paper. Here are the results:
 
+| Algo     | L0  | L4  | L4WC | L5  | L5WC | L6  | L6WC |
+| -------- | --- | --- | ---- | --- | ---- | --- | ---- |
+| PPO      | 100 | 98  | 86   | 98  | 68   | 94  | X    |
+| PPO-Lag  | X   | X   | 94   | X   | 74   | X   | 12   |
+| TRPO     | 100 | 96  | 88   | 98  | 78   | 92  | 52   |
+| TRPO-Lag | X   | X   | 84   | X   | 54   | X   | 18   |
+| SAC      | 98  | 74  | X    | X   | X    | X   | X    
+Note that these were achieved after tuning, which is why there isn't much in the way of updates this day. 
 # 07-21-26
 ```sh
 tmux
@@ -1160,8 +1188,12 @@ cd ~/RISE-2026/SpecRLBench && python train/ppo_lag_train_env.py --task PointLTL4
 - POC SafePO migration -- make sure all tasks are completable with high accuracy
 - Transition to multi-agent environment (PPO, HAPPO, MAPPO & variations)
 - Different ways to train multi-agent environments
-
-= Objective/Motivation - Higher-level (broad audience), challenges. What are we trying to achieve. Explain scientific contributions. Explain what you did (framework, setup); Present algorithms, experimental systematic evaluation (graphics/pictures); visual demos of project
+## Poster Notes
+ Objective/Motivation - Higher-level (broad audience), challenges. What are we trying to achieve. Explain scientific contributions. Explain what you did (framework, setup); Present algorithms, experimental systematic evaluation (graphics/pictures); visual demos of project
+# 07-23-26
+```sh
+conda activate safepo && cd SpecRLBench/
+```
 
 --- 
 #project/idea 

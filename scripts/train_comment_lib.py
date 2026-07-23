@@ -231,18 +231,102 @@ def _require(flags: dict[str, str | list[str]], key: str) -> str:
     return val
 
 
-def encode_command(text: str) -> str:
-    """Build ``# algo_envTask_...`` comment from a train shell command."""
-    flags = parse_flags(text)
-    algo = detect_algo(text, flags)
+CONFIG_FIELD_MAP: dict[str, str] = {
+    "task": "task",
+    "total_steps": "total-steps",
+    "steps_per_epoch": "steps-per-epoch",
+    "num_envs": "num-envs",
+    "actor_lr": "actor-lr",
+    "critic_lr": "critic-lr",
+    "batch_size": "batch-size",
+    "learning_iters": "learning-iters",
+    "target_kl": "target-kl",
+    "gamma": "gamma",
+    "lam": "lam",
+    "lam_c": "lam-c",
+    "clip_ratio": "clip-ratio",
+    "max_grad_norm": "max-grad-norm",
+    "hidden_sizes": "hidden-sizes",
+    "lr_end_factor": "lr_end_factor",
+    "cost_limit": "cost-limit",
+    "lagrangian_multiplier_init": "lagrangian-multiplier-init",
+    "lagrangian_multiplier_lr": "lagrangian-multiplier-lr",
+    "ent_coef": "ent-coef",
+}
 
+SCIENTIFIC_FLAG_KEYS = frozenset(
+    {"actor-lr", "critic-lr", "lagrangian-multiplier-lr"}
+)
+
+
+WHOLE_NUMBER_FLAGS = frozenset(
+    {"batch-size", "learning-iters", "num-envs", "max-grad-norm", "steps-per-epoch"}
+)
+
+
+def _scalar_to_flag_str(flag_key: str, value: int | float | bool) -> str:
+    if isinstance(value, bool):
+        return "True" if value else "False"
+    if (
+        isinstance(value, float)
+        and value == int(value)
+        and flag_key in WHOLE_NUMBER_FLAGS
+    ):
+        value = int(value)
+    if flag_key in SCIENTIFIC_FLAG_KEYS:
+        return fmt_num(str(value), style="scientific")
+    return fmt_num(str(value), style="decimal")
+
+
+def detect_algo_from_config(config: dict) -> str:
+    """Detect algorithm from SafePO ``config.json`` ``log_dir`` or ``exp_name``."""
+    log_dir = str(config.get("log_dir", "")).replace("\\", "/")
+    for algo in ALGOS_LONGEST_FIRST:
+        if f"/{algo}/" in log_dir:
+            return algo
+
+    exp_name = str(config.get("exp_name", ""))
+    for algo in ALGOS_LONGEST_FIRST:
+        needle = f"-{algo}-"
+        if needle in exp_name:
+            return algo
+
+    raise ValueError(
+        "cannot detect algorithm; expected /ppo_lag/ or /ppo/ etc. in log_dir, "
+        "or -ppo_lag- in exp_name"
+    )
+
+
+def config_to_flags(config: dict) -> tuple[str, dict[str, str | list[str]]]:
+    """Map SafePO config.json fields to encoder flag dict."""
+    algo = detect_algo_from_config(config)
+    flags: dict[str, str | list[str]] = {}
+
+    for cfg_key, flag_key in CONFIG_FIELD_MAP.items():
+        if cfg_key not in config:
+            continue
+        raw = config[cfg_key]
+        if flag_key == "hidden-sizes":
+            if not isinstance(raw, list) or not raw:
+                raise ValueError("hidden_sizes must be a non-empty list")
+            flags[flag_key] = [str(int(x)) for x in raw]
+        elif isinstance(raw, (int, float, bool)):
+            flags[flag_key] = _scalar_to_flag_str(flag_key, raw)
+        else:
+            flags[flag_key] = str(raw)
+
+    return algo, flags
+
+
+def encode_from_flags(algo: str, flags: dict[str, str | list[str]]) -> str:
+    """Build quoted hyperparam comment from algorithm + flag dict."""
     for key in REQUIRED_CORE:
         if key not in flags:
-            raise ValueError(f"missing required flag --{key}")
+            raise ValueError(f"config missing required field for --{key}")
 
     hidden = flags["hidden-sizes"]
     if not isinstance(hidden, list) or not hidden:
-        raise ValueError("missing required flag --hidden-sizes")
+        raise ValueError("config missing hidden_sizes")
 
     parts: list[str] = [
         algo,
@@ -272,7 +356,7 @@ def encode_command(text: str) -> str:
     if algo in PPO_FAMILY:
         lre = flags.get("lr_end_factor")
         if lre is None:
-            raise ValueError("missing required flag --lr_end_factor for PPO-family algos")
+            raise ValueError("config missing lr_end_factor for PPO-family algos")
         parts.append(f"lre{fmt_num(str(lre), style='decimal')}")
 
     if algo in LAG_ALGOS:
@@ -291,10 +375,25 @@ def encode_command(text: str) -> str:
     return "'" + "_".join(parts) + "'"
 
 
+def encode_config(config: dict) -> str:
+    """Build hyperparam comment from a SafePO ``config.json`` object."""
+    algo, flags = config_to_flags(config)
+    return encode_from_flags(algo, flags)
+
+
+def encode_command(text: str) -> str:
+    """Build hyperparam comment from a train shell command."""
+    flags = parse_flags(text)
+    algo = detect_algo(text, flags)
+    return encode_from_flags(algo, flags)
+
+
 def _strip_comment_prefix(comment: str) -> str:
     line = comment.strip()
     if line.startswith("#"):
         return line[1:].strip()
+    if len(line) >= 2 and line[0] == line[-1] == "'":
+        return line[1:-1]
     return line
 
 
