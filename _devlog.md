@@ -1181,12 +1181,41 @@ tmux
 cd SpecRLBench/; conda activate specbench; export DISPLAY=":10"; python train/{ALGO}_train_env.py
 ```
 ## SB3 Emigration
-However, the main part of the project that I worked on was the initial migration to Safe PO. I realized that, if I wanted to do MA tasks rather than the SA ones I was currently doing, I would have to write more custom SB3-coded implementations of the algorithms. SB3 already didn't natively support Lagrangian variations of the algorithms nor RND, and on top of this, I would have to write packages for MAPPO, HAPPO, and their Lagrangian variations too! I thought that this was too much custom code, so I began to search at different libraries I could use instead.
-### OmniSafe
+However, the main part of the project that I worked on was the initial migration to Safe PO. I realized that, if I wanted to do MA tasks rather than the SA ones I was currently doing, I would have to write more custom SB3-coded implementations of the algorithms. SB3 already didn't natively support Lagrangian variations of the algorithms nor RND, and on top of this, I would have to write packages for MAPPO, HAPPO, and their Lagrangian variations too! I thought that this was too much custom code, so I began to search at different libraries I could use instead. I had two libraries that I could choose from, both written by Peking University (the same people who made Safety-Gymnasium): OmniSafe and Safe PO.
 
+| OmniSafe                                                                                                                                                                                                                 | SafePO                                                                                                                                                                       |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OmniSafe is also built by Peking University, but it is meant as an easier, more user-friendly alternative to SafePO. It only has single agent algorithms, though it does have normal and Lagrangian variations for them. | Safe Policy Optimization is the accompanying library PKU made as an accompaniment to Safety-Gymnasium. It has single and multi-agent algorithms both vanilla and Lagrangian. |
+After reviewing the differences in the libraries, I chose to go with SafePO because of its multi agent capabilities. I didn't want to repeat the same mistake of choosing easy compatibility. in exchange for breadth, especially because from what I could see on the docs, it is quite easy to switch to a multi-agent environment. \
+Since it was sort of a messy process, I will summarize how to do it yourself if you're reading this and want to implement what I did:
 ```sh
+cd ~/RISE-2026 # or whatever folder you currently have SpecRLBench in
+git clone -b SpecRLBenchMods \
+    https://github.com/akhaled247/Safe-Policy-Optimization.git \
+    Safe-Policy-Optimization
+    
+touch Safe-Policy-Optimization/safepo/single_agent/__init__.py
+
+pip install -e ./Safe-Policy-Optimization --no-deps
+
+cd ~/RISE-2026/SpecRLBench # or whatever folder you currently have SpecRLBench in
+pip install -r requirements-safepo.txt
+
+conda activate safepo
+python train/ppo_train_env.py --task PointLTL4MASAR1WC-v0 --seed 0 \
+  --total-steps 40000 --num-envs 1 --steps-per-epoch 2000 --device cpu
+  
+# Real command
 cd ~/RISE-2026/SpecRLBench && python train/ppo_lag_train_env.py --task PointLTL4MASAR1WC-v0 --seed 0 --total-steps 1000000 --num-envs 8 --steps-per-epoch 16384 --device cuda --device-id 1 --write-terminal True --use-tensorboard True
 ```
+Once I had it set up, I was able to start debugging the project. Some of the issues I fixed included:
+1. SB3 dependency in `env_utils.py` -- related to an obsolete portion of the code I could safely remove
+2. Fixed `torch` old dependency error -- few lines of code, but goes to show how old the repository is
+3. Since I am using a harness to allow me to access the algorithms similarly to how I would before, I had to add compatibility for Safe PO's `--write-terminal` and `--use-tensorboard` flags, which did similar things to `verbose` and `tensorboard_log` in SB3
+4. Reinstated the parallel environments that I was running with SB3 for Safe PO
+5. Simplified WC wrapper by inheriting the original SAR wrapper. All that was added was a check for the wall cost, so that made the most sense
+6. Added capability to change the `end_factor` parameter in the actor scheduler of PPO and PPO_Lag because it would taper off and make learning rate `0` by the end of the training run, which resulted in inferior results
+7. Added SB3 models I had recorded previously as a reference in case I wanted to revert and/or compare performance. They also were only saved locally, so I thought it would be smart to upload them before migrating completely.
 # 07-22-26
 - POC SafePO migration -- make sure all tasks are completable with high accuracy
 - Transition to multi-agent environment (PPO, HAPPO, MAPPO & variations)

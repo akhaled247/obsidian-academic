@@ -103,8 +103,6 @@ def _canonical_flag(token: str) -> str | None:
         "env-id": "task",
         "lr-end-factor": "lr_end_factor",
         "lr_end_factor": "lr_end_factor",
-        "ent_coef": "ent-coef",
-        "ent-coef": "ent-coef",
     }
     if name in aliases:
         return aliases[name]
@@ -369,7 +367,7 @@ def encode_from_flags(algo: str, flags: dict[str, str | list[str]]) -> str:
         )
 
     ent_coef = flags.get("ent-coef")
-    if isinstance(ent_coef, str):
+    if isinstance(ent_coef, str) and float(ent_coef) != 0.0:
         parts.append(f"ec{fmt_num(ent_coef, style='decimal')}")
 
     return "'" + "_".join(parts) + "'"
@@ -601,18 +599,16 @@ def format_shell(
         parallel_prefix = f"    --parallel {_bool_str(extras.parallel)}"
 
     if algo in PPO_FAMILY:
-        lines.append(f"{parallel_prefix} --lr_end_factor {flags['lr_end_factor']}")
+        tail = f"{parallel_prefix} --lr_end_factor {flags['lr_end_factor']}"
     else:
-        lines.append(parallel_prefix)
+        tail = parallel_prefix
 
-    shell = "\n".join(lines)
     ent_coef = flags.get("ent-coef")
     if isinstance(ent_coef, str):
-        shell = (
-            f"# ent_coef={ent_coef} (SB3/fork only; SafePO stock CLI has no --ent-coef)\n"
-            + shell
-        )
-    return shell
+        tail += f" --ent-coef {ent_coef}"
+    lines.append(tail)
+
+    return "\n".join(lines)
 
 
 def decode_comment(comment: str, extras: DecodeExtras | None = None) -> str:
